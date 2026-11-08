@@ -1,0 +1,45 @@
+-- ============================================================================
+-- Room Scheduling Tracker — SQLite demo seed data
+-- Run AFTER database/sqlite_schema.sql:
+--   sqlite3 storage/rst.db < database/sqlite_schema.sql
+--   sqlite3 storage/rst.db < database/sqlite_seed.sql
+-- Same demo data as database/seed.sql (MySQL version).
+-- Demo logins (password for all three: password123)
+--   admin / admin@example.com — admin
+--   jdoe  / jdoe@example.com  — teacher
+--   ana   / ana@example.com   — student, BSIT-1A
+-- ============================================================================
+INSERT INTO tblUsers (user_id, username, email, password_hash, role, section, org_name, phone_number) VALUES
+(1, 'admin', 'admin@example.com', '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'admin', NULL, NULL, '+63917-123-4567'),
+(2, 'jdoe',  'jdoe@example.com',  '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'teacher', NULL, NULL, '+63917-123-4568'),
+(3, 'ana',   'ana@example.com',   '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'student', 'BSIT-1A', 'Computer Science Society', '+63917-123-4569');
+
+INSERT INTO tblMaps (map_id, map_name, floor_number, map_width, map_height, background_image, map_status) VALUES
+(1, 'Main Building - Floor 1', 1, 1200.00, 800.00, NULL, 'active'),
+(2, 'Main Building - Floor 2', 2, 1200.00, 800.00, NULL, 'active');
+
+INSERT INTO tblRooms (room_id, map_id, room_name, shape_type, shape_data, room_description, room_status) VALUES
+(101, 1, 'Room 101', 'rectangle', '{"type":"rectangle","x":20,"y":20,"width":260,"height":180}', 'Computer laboratory', 'active'),
+(102, 1, 'Room 102', 'rectangle', '{"type":"rectangle","x":300,"y":20,"width":260,"height":180}', 'Lecture room', 'active'),
+(103, 1, 'Room 103', 'polygon',   '{"type":"polygon","points":[{"x":580,"y":20},{"x":820,"y":20},{"x":820,"y":200},{"x":700,"y":200},{"x":700,"y":120},{"x":580,"y":120}]}', 'L-shaped seminar room', 'active'),
+(201, 2, 'Room 201', 'rectangle', '{"type":"rectangle","x":20,"y":20,"width":260,"height":180}', 'Lecture room', 'active'),
+(202, 2, 'Room 202', 'rectangle', '{"type":"rectangle","x":300,"y":20,"width":260,"height":180}', 'Computer laboratory', 'active');
+
+INSERT INTO tblSchedules (schedule_id, organizer_id, room_id, schedule_title, schedule_description, recurrence_type, start_date, end_date, start_time, end_time, schedule_status) VALUES
+(25, 2, 101, 'IT Department Meeting', 'Weekly department coordination meeting', 'weekly', '2026-11-02', '2026-12-31', '09:00:00', '10:30:00', 'active'),
+(26, 2, 102, 'BSIT-1A Lecture', 'Intro to Programming', 'weekly', '2026-11-02', '2026-12-31', '13:00:00', '14:30:00', 'active'),
+(27, 3, 201, 'CSS Org Meeting', 'Computer Science Society planning', 'one_time', '2026-11-09', NULL, '15:00:00', '16:00:00', 'active');
+
+INSERT INTO tblScheduleDays (schedule_id, day_of_week) VALUES
+(25, 1),
+(26, 1), (26, 3), (26, 5);
+
+INSERT INTO tblScheduleExceptions (schedule_id, original_date, exception_type, exception_reason, created_by) VALUES
+(25, '2026-11-09', 'skipped', 'Room unavailable for maintenance', 2);
+
+INSERT INTO tblScheduleOccurrences (schedule_id, occurrence_date, room_id, start_time, end_time, occurrence_status) VALUES
+(25, '2026-11-02', 101, '09:00:00', '10:30:00', 'scheduled'),
+(25, '2026-11-16', 101, '09:00:00', '10:30:00', 'scheduled'),
+(26, '2026-11-02', 102, '13:00:00', '14:30:00', 'scheduled'),
+(26, '2026-11-04', 102, '13:00:00', '14:30:00', 'scheduled'),
+(27, '2026-11-09', 201, '15:00:00', '16:00:00', 'scheduled');

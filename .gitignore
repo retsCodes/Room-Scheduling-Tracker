@@ -1,0 +1,8 @@
+.env
+storage/
+uploads/profiles/*
+uploads/maps/*
+!uploads/profiles/.gitkeep
+!uploads/maps/.gitkeep
+.DS_Store
+Thumbs.db
