@@ -10,24 +10,17 @@ use App\Models\User;
  * Authentication.
  *
  * Admin and student logins are SEPARATE pages — they are not the same form:
- *   /login          — portal chooser (pick Admin or Student)
- *   /login/admin    — admins only (role must be admin)
- *   /login/student  — students (teachers log in here too)
+ *   /login          — the STUDENT login (the only login linked publicly)
+ *   /login/admin    — admins only (role must be admin). This page is NOT
+ *                     linked from any student-facing page; admins reach it
+ *                     by direct URL, shared privately.
+ *   /login/student  — students (teachers and org officers log in here too)
  *   /register       — student registration (never creates an admin directly;
  *                     the first account on a fresh install becomes admin)
  */
 final class AuthController
 {
     public function __construct(private User $users) {}
-
-    /** Portal chooser: two separate login pages. */
-    public function showChooser(): void
-    {
-        if (Auth::check()) {
-            redirect('');
-        }
-        view('auth/choose', ['title' => 'Log in']);
-    }
 
     /**
      * @param 'admin'|'student' $scope Which login page this is.
@@ -68,7 +61,7 @@ final class AuthController
             flash('error', 'That account is not an admin account. Use the student login instead.');
             redirect('login/student');
         }
-        if ($scope === 'student' && !in_array($user['role'], ['student', 'teacher', 'scheduler', 'viewer'], true)) {
+        if ($scope === 'student' && !in_array($user['role'], ['student', 'teacher', 'officer', 'scheduler', 'viewer'], true)) {
             flash('error', 'That is an admin account. Use the admin login instead.');
             redirect('login/admin');
         }

@@ -1,17 +1,34 @@
-<h1>Dashboard</h1>
-<p class="muted">Today is <?= e(date('l, F j, Y')) ?>.</p>
-
-<div class="stat-grid">
-  <div class="stat"><strong><?= (int) $stats['rooms'] ?></strong><span>Rooms</span></div>
-  <div class="stat"><strong><?= (int) $stats['maps'] ?></strong><span>Floor maps</span></div>
-  <div class="stat"><strong><?= (int) $stats['schedules'] ?></strong><span>Active schedules</span></div>
-  <div class="stat"><strong><?= (int) $stats['today'] ?></strong><span>Bookings today</span></div>
+<?php $isGuest = !\App\Core\Auth::check(); ?>
+<?php if ($isGuest): ?>
+<div class="page-head">
+  <div>
+    <h1>📍 Campus Map — <?= e($first_map['map_name'] ?? 'First Floor') ?></h1>
+    <p class="muted">See which rooms are free right now, and what's booked today. Log in as a student to check the full schedule.</p>
+  </div>
+  <a class="btn btn-primary" href="<?= url('login') ?>">Student log in →</a>
 </div>
+<?php else: ?>
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-icon">🚪</div><div><strong><?= (int) $stats['rooms'] ?></strong><span>Rooms</span></div></div>
+  <div class="stat-card tint-green"><div class="stat-icon">✅</div><div><strong><?= (int) $stats['free_now'] ?></strong><span>Free right now</span></div></div>
+  <div class="stat-card tint-red"><div class="stat-icon">🔴</div><div><strong><?= (int) $stats['busy_now'] ?></strong><span>Occupied now</span></div></div>
+  <div class="stat-card tint-amber"><div class="stat-icon">📅</div><div><strong><?= (int) $stats['today'] ?></strong><span>Bookings today</span></div></div>
+</div>
+<?php endif; ?>
 
-<div class="grid-2">
+<?php if (!empty($first_map)): ?>
+<?php
+  $map = $first_map; $rooms = $first_rooms; $show_editor_link = true;
+  require __DIR__ . '/../maps/_interactive_map.php';
+?>
+<?php else: ?>
+<section class="card"><p class="muted">No floor maps yet.<?php if (\App\Core\Auth::isAdmin()): ?> <a href="<?= url('maps/create') ?>">Create the first map</a>.<?php endif; ?></p></section>
+<?php endif; ?>
+
+<div class="grid-2" style="margin-top:1.1rem">
   <section class="card">
     <h2>Rooms right now</h2>
-    <?php if (empty($room_status)): ?><p class="muted">No active rooms yet. <a href="<?= url('rooms/create') ?>">Add one</a>.</p>
+    <?php if (empty($room_status)): ?><p class="muted">No active rooms yet.</p>
     <?php else: ?>
     <ul class="clean-list">
       <?php foreach ($room_status as $rs): ?>
@@ -40,10 +57,17 @@
       <?php endforeach; ?>
     </ul>
     <?php endif; ?>
-    <p><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a></p>
+    <?php if (\App\Core\Auth::canBook()): ?>
+      <p><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a></p>
+    <?php elseif ($isGuest): ?>
+      <p><a class="btn btn-primary" href="<?= url('login') ?>">Log in to check schedules →</a></p>
+    <?php else: ?>
+      <p class="muted">Students view schedules only — booking is for admins, teachers and org officers.</p>
+    <?php endif; ?>
   </section>
 </div>
 
+<?php if (!$isGuest): ?>
 <section class="card">
   <h2>Upcoming</h2>
   <?php if (empty($upcoming)): ?><p class="muted">No upcoming bookings.</p>
@@ -63,11 +87,5 @@
     </tbody>
   </table>
   <?php endif; ?>
-</section>
-
-<?php if (!empty($maps)): ?>
-<section class="card">
-  <h2>Floor maps</h2>
-  <p><?php foreach ($maps as $m): ?><a class="btn" href="<?= url('maps/' . (int) $m['map_id']) ?>"><?= e($m['map_name']) ?></a> <?php endforeach; ?></p>
 </section>
 <?php endif; ?>

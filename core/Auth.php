@@ -7,9 +7,14 @@ use App\Models\User;
 
 /**
  * Session authentication + role checks.
- * Roles come from tblUsers.role: admin, teacher, student (the spreadsheet
- * also suggests scheduler / viewer — those are accepted as roles too and
- * behave like teacher / viewer respectively).
+ * Roles come from tblUsers.role: admin, teacher, student, officer
+ * (org officer — a student officer of a campus organization), plus
+ * scheduler / viewer from the spreadsheet's suggestions.
+ *
+ * Who can do what:
+ * - Book / make schedules: admin, teacher and org officer only.
+ * - Students: log in to check schedules only (read-only).
+ * - Manage maps, rooms and users: admin only.
  */
 final class Auth
 {
@@ -39,10 +44,19 @@ final class Auth
         return self::role() === 'admin';
     }
 
-    /** Admins and teachers/schedulers can create and manage schedules. */
+    /**
+     * Only admin, teacher and org officer can book rooms / make schedules.
+     * Students log in only to check schedules (read-only).
+     */
     public static function canBook(): bool
     {
-        return in_array(self::role(), ['admin', 'teacher', 'scheduler', 'student'], true);
+        return in_array(self::role(), ['admin', 'teacher', 'scheduler', 'officer'], true);
+    }
+
+    /** Students (and viewers) can only view schedules — no booking. */
+    public static function isReadOnly(): bool
+    {
+        return self::check() && !self::canBook();
     }
 
     /** Only admins manage maps, rooms and users. */

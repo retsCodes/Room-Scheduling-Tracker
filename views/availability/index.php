@@ -24,7 +24,7 @@
       <div class="card">
         <h3><?= e($r['room_name']) ?></h3>
         <p class="muted"><?= e($r['map_name']) ?> · <?= e($r['room_description'] ?? '') ?></p>
-        <a class="btn btn-primary" href="<?= url('schedules/create') ?>">Book this room →</a>
+        <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">Book this room →</a><?php endif; ?>
       </div>
       <?php endforeach; ?>
     </div>

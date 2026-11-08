@@ -6,8 +6,11 @@ Book rooms, see who's using a room right now on a floor map, check availability,
 
 ## What it does
 
-- **Auth & roles** — register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student` (plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. Admins manage maps, rooms and users; teachers/students can book.
-- **Separate logins** — admin and student logins are different pages, not one form: `/login` is a chooser, `/login/admin` only accepts admin accounts, `/login/student` is for students (teachers log in there too). An admin account is rejected on the student page and vice versa.
+- **Auth & roles** — register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student`, `officer` (org officer, plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. **Only admins, teachers and org officers can book rooms / make schedules** — students log in only to check schedules (read-only; booking buttons are hidden from them and the server rejects their booking requests). Admins manage maps, rooms and users.
+- **Separate logins** — admin and student logins are different pages, not one form. `/login` IS the student login (the only login linked anywhere public). `/login/admin` only accepts admin accounts and is **not linked from any student-facing page** — admins reach it by direct URL, shared privately. `/login/student` is for students (teachers and org officers log in there too). An admin account is rejected on the student page and vice versa.
+- **Home page = first floor map** — the first page anyone sees showcases the first floor layout (lowest active floor) with live room status: green available, red occupied now, amber reserved later today, grey unavailable. Click a room for its details and today's bookings; floor tabs switch floors; quick search filters rooms. Logged-in users get the same map plus dashboard stats.
+- **Interactive map** — rooms animate on hover/select, busy rooms pulse, floor tabs and quick search filter live, and each room page has a timeline view of today's bookings (Figma Room Details).
+- **Admin map editor** — `/maps/{id}/editor`: drag rooms to move them, drag the white corner dot to resize rectangles, edit name/position/size/description/status in the Room Properties panel and watch the map redesign live, then Save layout. Export downloads the map + rooms as JSON.
 - **Floor maps** — CRUD for maps (`tblMaps`: name, floor, width/height, background image, status). Each map renders as an interactive SVG: rooms are drawn from their `shape_data` JSON (rectangle / polygon / path) and coloured green/red by whether they are free or busy right now.
 - **Rooms** — CRUD for rooms (`tblRooms`), with shape JSON, description and `active` / `unavailable` status.
 - **Schedules** — CRUD with recurrence: `one_time`, `daily`, `weekly` (pick weekdays, 1=Mon…7=Sun via `tblScheduleDays`), `monthly`. Saving a schedule materialises its occurrences in `tblScheduleOccurrences`.
@@ -82,11 +85,12 @@ php -S localhost:8000
 
 Demo logins after `seed.sql` (password for all three: **`password123`** — change them before going live):
 
-| Username | Email | Role | Login page |
-|---|---|---|---|
-| `admin` | admin@example.com | admin | `/login/admin` |
-| `jdoe` | jdoe@example.com | teacher | `/login/student` |
-| `ana` | ana@example.com | student, BSIT-1A | `/login/student` |
+| Username | Email | Role | Login page | Can book? |
+|---|---|---|---|---|---|
+| `admin` | admin@example.com | admin | `/login/admin` (direct URL only) | Yes |
+| `jdoe` | jdoe@example.com | teacher | `/login/student` | Yes |
+| `officer` | officer@example.com | org officer | `/login/student` | Yes |
+| `ana` | ana@example.com | student, BSIT-1A | `/login/student` | No — views only |
 
 ## Folder name / XAMPP — it just works
 

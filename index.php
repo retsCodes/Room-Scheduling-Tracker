@@ -139,8 +139,10 @@ try {
     if ($path === '') {
         $dashboard->index();
     } elseif ($path === 'login' && !$isPost) {
-        // Login portal chooser: admin and student logins are separate pages.
-        $auth->showChooser();
+        // The public login page is the STUDENT login only. The admin login
+        // lives at /login/admin and is deliberately not linked from any
+        // student-facing page — admins reach it by direct URL.
+        $auth->showLogin('student');
     } elseif ($path === 'login/admin' && !$isPost) {
         $auth->showLogin('admin');
     } elseif ($path === 'login/admin' && $isPost) {
@@ -169,6 +171,12 @@ try {
         $mapCtl->edit((int) $p['id']);
     } elseif (($p = $match($segments, 'maps/{id}/delete')) && $isPost) {
         $mapCtl->destroy((int) $p['id']);
+    } elseif (($p = $match($segments, 'maps/{id}/editor')) && !$isPost) {
+        $mapCtl->editor((int) $p['id']);
+    } elseif (($p = $match($segments, 'maps/{id}/layout')) && $isPost) {
+        $mapCtl->saveLayout((int) $p['id']);
+    } elseif (($p = $match($segments, 'maps/{id}/export')) && !$isPost) {
+        $mapCtl->exportMap((int) $p['id']);
     } elseif ($path === 'rooms' && !$isPost) {
         $roomCtl->index();
     } elseif ($path === 'rooms' && $isPost) {
@@ -221,8 +229,9 @@ try {
         http_response_code(404);
         view('dashboard/index', [
             'title' => 'Not found',
-            'stats' => ['rooms' => 0, 'maps' => 0, 'schedules' => 0, 'today' => 0],
+            'stats' => ['rooms' => 0, 'maps' => 0, 'schedules' => 0, 'today' => 0, 'free_now' => 0, 'busy_now' => 0],
             'today' => [], 'week' => [], 'upcoming' => [], 'room_status' => [], 'maps' => [],
+            'first_map' => null, 'first_rooms' => [], 'busy' => [], 'today_date' => date('Y-m-d'),
         ]);
         echo '<p class="flash flash-error">Page not found: ' . htmlspecialchars($path) . '</p>';
     }

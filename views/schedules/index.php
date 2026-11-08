@@ -1,7 +1,8 @@
 <div class="page-head">
   <h1>Schedules</h1>
-  <a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a>
+  <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a><?php endif; ?>
 </div>
+<?php if (\App\Core\Auth::isReadOnly()): ?><p class="muted">You're viewing schedules as a student — only admins, teachers and org officers can book rooms.</p><?php endif; ?>
 <form method="get" action="<?= url('schedules') ?>" class="card form-inline">
   <input type="search" name="search" placeholder="Search title…" value="<?= e($filters['search'] ?? '') ?>">
   <select name="room_id">
@@ -19,7 +20,7 @@
   <button class="btn" type="submit">Filter</button>
 </form>
 <?php if (empty($schedules)): ?>
-  <p class="muted">No schedules match. <a href="<?= url('schedules/create') ?>">Create the first one</a>.</p>
+  <p class="muted">No schedules match.<?php if (\App\Core\Auth::canBook()): ?> <a href="<?= url('schedules/create') ?>">Create the first one</a>.<?php endif; ?></p>
 <?php else: ?>
 <table class="table card">
   <thead><tr><th>Title</th><th>Room</th><th>Recurrence</th><th>Dates</th><th>Time</th><th>Organizer</th><th>Status</th></tr></thead>

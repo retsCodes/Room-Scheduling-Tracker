@@ -40,6 +40,8 @@ final class RoomController
         view('rooms/show', [
             'title' => $room['room_name'],
             'room' => $room,
+            'today' => $today,
+            'today_occ' => $this->occurrences->forDateRange($today, $today, $id),
             'upcoming' => $this->occurrences->forDateRange($today, date('Y-m-d', strtotime('+30 days')), $id),
         ]);
     }

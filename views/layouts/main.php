@@ -7,35 +7,76 @@
 <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>">
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="<?= url('') ?>">🏫 Room Scheduling Tracker</a>
+<?php
+$loggedIn = \App\Core\Auth::check(); $isAdmin = \App\Core\Auth::isAdmin();
+// Active nav item, derived from the URL so no controller has to pass it.
+$current = $current ?? '';
+if ($current === '') {
+    $reqPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
+    $base = trim(base_path(), '/');
+    if ($base !== '' && str_starts_with($reqPath, $base)) { $reqPath = trim(substr($reqPath, strlen($base)), '/'); }
+    $seg = explode('/', $reqPath)[0] ?? '';
+    $current = match ($seg) { '', 'index.php' => 'dashboard', 'maps' => 'maps', 'rooms' => 'rooms', 'schedules' => 'schedules', 'calendar' => 'calendar', 'availability' => 'availability', 'occurrences' => 'occurrences', 'users' => 'users', default => $seg };
+}
+?>
+<?php if ($loggedIn): ?>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="<?= url('') ?>"><span class="brand-mark">R</span> Room Scheduling<br>Tracker</a>
+    <nav>
+      <a href="<?= url('') ?>" class="<?= $current === 'dashboard' ? 'active' : '' ?>"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a href="<?= url('maps') ?>" class="<?= $current === 'maps' ? 'active' : '' ?>"><span class="nav-icon">🗺️</span> Campus Map</a>
+      <a href="<?= url('schedules') ?>" class="<?= $current === 'schedules' ? 'active' : '' ?>"><span class="nav-icon">📅</span> Schedules</a>
+      <a href="<?= url('calendar') ?>" class="<?= $current === 'calendar' ? 'active' : '' ?>"><span class="nav-icon">🗓️</span> Calendar</a>
+      <a href="<?= url('availability') ?>" class="<?= $current === 'availability' ? 'active' : '' ?>"><span class="nav-icon">🔍</span> Availability</a>
+      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">📌</span> Occurrences</a>
+      <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
+      <?php if ($isAdmin): ?>
+      <a href="<?= url('users') ?>" class="<?= $current === 'users' ? 'active' : '' ?>"><span class="nav-icon">👥</span> User List</a>
+      <?php endif; ?>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="user-chip"><?= e(\App\Core\Auth::user()['username'] ?? '') ?> <small><?= e(\App\Core\Auth::role() ?? '') ?><?= \App\Core\Auth::role() === 'officer' ? ' (org officer)' : '' ?></small></span>
+      <form method="post" action="<?= url('logout') ?>" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost" type="submit">⇦ Log out</button></form>
+    </div>
+  </aside>
+  <div class="main-col">
+    <header class="topbar">
+      <p class="page-title"><?= e($title ?? 'Room Scheduling Tracker') ?></p>
+      <div class="top-actions">
+        <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a><?php endif; ?>
+        <span class="muted"><?= e(date('l, F j, Y')) ?></span>
+      </div>
+    </header>
+    <main class="content">
+      <?php foreach (flashes() as $f): ?>
+        <div class="flash flash-<?= e($f['type']) ?>"><?= e($f['message']) ?></div>
+      <?php endforeach; ?>
+      <?= $content ?? '' ?>
+    </main>
+    <footer class="footer">Room Scheduling Tracker — database: <code>rst_db</code></footer>
+  </div>
+</div>
+<?php else: ?>
+<header class="guest-topbar">
+  <a class="brand" href="<?= url('') ?>"><span class="brand-mark">R</span> Room Scheduling Tracker</a>
   <nav>
-    <?php if (\App\Core\Auth::check()): ?>
-      <a href="<?= url('') ?>">Dashboard</a>
-      <a href="<?= url('maps') ?>">Maps</a>
-      <a href="<?= url('rooms') ?>">Rooms</a>
-      <a href="<?= url('schedules') ?>">Schedules</a>
-      <a href="<?= url('calendar') ?>">Calendar</a>
-      <a href="<?= url('availability') ?>">Availability</a>
-      <a href="<?= url('occurrences') ?>">Occurrences</a>
-      <?php if (\App\Core\Auth::isAdmin()): ?><a href="<?= url('users') ?>">Users</a><?php endif; ?>
-      <span class="user-chip"><?= e(\App\Core\Auth::user()['username'] ?? '') ?> (<?= e(\App\Core\Auth::role() ?? '') ?>)</span>
-      <form method="post" action="<?= url('logout') ?>" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost" type="submit">Log out</button></form>
-    <?php else: ?>
-      <a href="<?= url('login') ?>">Log in</a>
-      <a href="<?= url('register') ?>">Register</a>
-    <?php endif; ?>
+    <a href="<?= url('login') ?>">Log in</a>
+    &nbsp;·&nbsp;
+    <a href="<?= url('register') ?>">Register</a>
   </nav>
 </header>
-<main class="container">
+<main>
   <?php foreach (flashes() as $f): ?>
-    <div class="flash flash-<?= e($f['type']) ?>"><?= e($f['message']) ?></div>
+    <div style="max-width:1180px;margin:1rem auto 0;padding:0 1.5rem;"><div class="flash flash-<?= e($f['type']) ?>"><?= e($f['message']) ?></div></div>
   <?php endforeach; ?>
   <?= $content ?? '' ?>
 </main>
-<footer class="footer">
-  Room Scheduling Tracker — database: <code>rst_db</code> (tblUsers, tblMaps, tblRooms, tblSchedules, tblScheduleDays, tblScheduleExceptions, tblScheduleOccurrences)
-</footer>
+<footer class="footer">Room Scheduling Tracker — database: <code>rst_db</code></footer>
+<?php endif; ?>
 <script src="<?= url('assets/js/app.js') ?>"></script>
+<?php if (!empty($extra_js)): ?>
+<script src="<?= url($extra_js) ?>"></script>
+<?php endif; ?>
 </body>
 </html>

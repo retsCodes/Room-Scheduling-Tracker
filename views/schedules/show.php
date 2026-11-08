@@ -1,11 +1,13 @@
 <div class="page-head">
   <h1><?= e($schedule['schedule_title']) ?></h1>
+  <?php if (\App\Core\Auth::canBook()): ?>
   <div>
     <a class="btn" href="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/edit') ?>">Edit</a>
     <?php if ($schedule['schedule_status'] === 'active'): ?>
     <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/cancel') ?>" class="inline-form" onsubmit="return confirm('Cancel this schedule and its future occurrences?')"><?= csrf_field() ?><button class="btn btn-danger" type="submit">Cancel schedule</button></form>
     <?php endif; ?>
   </div>
+  <?php endif; ?>
 </div>
 <div class="card">
   <p><strong>Room:</strong> <a href="<?= url('rooms/' . (int) $schedule['room_id']) ?>"><?= e($schedule['room_name']) ?></a> (<?= e($schedule['map_name']) ?>)</p>
@@ -29,10 +31,12 @@
       <td><?= time_12h($occ['start_time']) ?>–<?= time_12h($occ['end_time']) ?></td>
       <td><?= status_badge($occ['occurrence_status']) ?></td>
       <td>
+        <?php if (\App\Core\Auth::canBook()): ?>
         <?php if ($occ['occurrence_status'] === 'scheduled'): ?>
         <form method="post" action="<?= url('occurrences/' . (int) $occ['occurrence_id'] . '/status') ?>" class="inline-form"><?= csrf_field() ?><input type="hidden" name="status" value="cancelled"><button class="btn btn-small" type="submit">Cancel this date</button></form>
         <?php elseif ($occ['occurrence_status'] === 'cancelled'): ?>
         <form method="post" action="<?= url('occurrences/' . (int) $occ['occurrence_id'] . '/status') ?>" class="inline-form"><?= csrf_field() ?><input type="hidden" name="status" value="scheduled"><button class="btn btn-small" type="submit">Restore</button></form>
+        <?php endif; ?>
         <?php endif; ?>
       </td>
     </tr>
@@ -41,6 +45,7 @@
 </table>
 <?php endif; ?>
 
+<?php if (\App\Core\Auth::canBook()): ?>
 <h2>Add an exception</h2>
 <p class="muted">Skip, move or modify a single occurrence without changing the whole series.</p>
 <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/exceptions') ?>" class="card form">
@@ -66,6 +71,7 @@
   <label>Reason <input type="text" name="exception_reason" maxlength="255" placeholder="Room unavailable for maintenance"></label>
   <button class="btn btn-primary" type="submit">Save exception</button>
 </form>
+<?php endif; ?>
 
 <?php if (!empty($exceptions)): ?>
 <h2>Exceptions</h2>
@@ -85,6 +91,8 @@
 </table>
 <?php endif; ?>
 
+<?php if (\App\Core\Auth::canBook()): ?>
 <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/delete') ?>" class="card form danger-zone" onsubmit="return confirm('Delete this schedule and all its occurrences?')">
   <?= csrf_field() ?><button class="btn btn-danger" type="submit">Delete schedule</button>
 </form>
+<?php endif; ?>
