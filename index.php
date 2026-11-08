@@ -97,12 +97,20 @@ $availCtl    = new AvailabilityController($availability, $rooms, $maps);
 $userCtl     = new UserController($users);
 
 // --- Routing -----------------------------------------------------------------
-// $path is the URL path after the project root (e.g. "schedules/25/edit").
+// $path is the URL path inside the app (e.g. "schedules/25/edit").
+// The project folder name is stripped first, so routing works whether the
+// app lives at the web root or in any subfolder (XAMPP: htdocs/<any-name>/).
 // POST forms use a hidden _method-free convention: the same URL handles the
 // POST (update/store/delete) when the request method is POST.
 $uri  = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? '/';
+$base = base_path();
+if ($base !== '' && str_starts_with($uri, $base)) {
+    $uri = substr($uri, strlen($base));
+    $uri = $uri === '' ? '/' : $uri;
+}
 $path = trim($uri, '/');
-// Strip a leading "index.php" when the server exposes it in the URL.
+// Strip a leading "index.php" when the server exposes it in the URL
+// (e.g. /Room-Scheduling-Tracker/index.php/schedules).
 $path = preg_replace('#^index\.php/?#', '', $path) ?? $path;
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $isPost = $method === 'POST';
@@ -131,9 +139,16 @@ try {
     if ($path === '') {
         $dashboard->index();
     } elseif ($path === 'login' && !$isPost) {
-        $auth->showLogin();
-    } elseif ($path === 'login' && $isPost) {
-        $auth->login();
+        // Login portal chooser: admin and student logins are separate pages.
+        $auth->showChooser();
+    } elseif ($path === 'login/admin' && !$isPost) {
+        $auth->showLogin('admin');
+    } elseif ($path === 'login/admin' && $isPost) {
+        $auth->login('admin');
+    } elseif ($path === 'login/student' && !$isPost) {
+        $auth->showLogin('student');
+    } elseif ($path === 'login/student' && $isPost) {
+        $auth->login('student');
     } elseif ($path === 'register' && !$isPost) {
         $auth->showRegister();
     } elseif ($path === 'register' && $isPost) {
@@ -217,5 +232,5 @@ try {
     }
     http_response_code(500);
     echo '<h1>Something went wrong</h1><p>' . htmlspecialchars($e->getMessage()) . '</p>'
-        . '<p><a href="/">Back to dashboard</a></p>';
+        . '<p><a href="' . e(url('')) . '">Back to dashboard</a></p>';
 }

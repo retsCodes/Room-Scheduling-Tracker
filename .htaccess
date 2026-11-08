@@ -1,0 +1,22 @@
+# Room Scheduling Tracker — clean URLs in any folder (XAMPP included).
+# This file lives at the project root, so it works no matter what the
+# project folder is called: /schedules, /login/admin, /assets/css/style.css
+# are all resolved relative to this folder.
+#
+# If mod_rewrite is off, this block is skipped (<IfModule>) and the app
+# still works with URLs like: /Room-Scheduling-Tracker/index.php/schedules
+# To enable clean URLs in XAMPP, make sure httpd.conf has:
+#   LoadModule rewrite_module modules/mod_rewrite.so   (on by default)
+#   AllowOverride All                                  (for htdocs)
+
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Real files (CSS, JS, images) and real folders are served directly —
+    # only everything else is routed through index.php.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>

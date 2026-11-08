@@ -8,6 +8,12 @@ declare(strict_types=1);
  * Copy `.env.example` to `.env` and edit it — never commit real credentials.
  * A tiny .env loader is included so the app works without a web-server
  * env setup (XAMPP / Laragon / plain `php -S`).
+ *
+ * No folder name is configured anywhere: links, redirects and assets use
+ * base_path() (core/helpers.php), which detects the project folder from
+ * the running script at runtime. Rename the XAMPP folder freely.
+ * Setting APP_URL (e.g. APP_URL=http://localhost/MyFolder) overrides
+ * the detection if you ever need it to.
  */
 
 $root = dirname(__DIR__);

@@ -6,23 +6,53 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Models\User;
 
+/**
+ * Authentication.
+ *
+ * Admin and student logins are SEPARATE pages — they are not the same form:
+ *   /login          — portal chooser (pick Admin or Student)
+ *   /login/admin    — admins only (role must be admin)
+ *   /login/student  — students (teachers log in here too)
+ *   /register       — student registration (never creates an admin directly;
+ *                     the first account on a fresh install becomes admin)
+ */
 final class AuthController
 {
     public function __construct(private User $users) {}
 
-    public function showLogin(): void
+    /** Portal chooser: two separate login pages. */
+    public function showChooser(): void
     {
         if (Auth::check()) {
             redirect('');
         }
-        view('auth/login', ['title' => 'Log in']);
+        view('auth/choose', ['title' => 'Log in']);
     }
 
-    public function login(): void
+    /**
+     * @param 'admin'|'student' $scope Which login page this is.
+     */
+    public function showLogin(string $scope = 'student'): void
     {
+        if (Auth::check()) {
+            redirect('');
+        }
+        $scope = $scope === 'admin' ? 'admin' : 'student';
+        view('auth/login', [
+            'title' => $scope === 'admin' ? 'Admin log in' : 'Student log in',
+            'scope' => $scope,
+        ]);
+    }
+
+    /**
+     * @param 'admin'|'student' $scope Which login page was submitted.
+     */
+    public function login(string $scope = 'student'): void
+    {
+        $scope = $scope === 'admin' ? 'admin' : 'student';
         if (!is_post() || !verify_csrf()) {
             flash('error', 'Invalid request. Please try again.');
-            redirect('login');
+            redirect('login/' . $scope);
         }
         $login = trim((string) ($_POST['login'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
@@ -30,7 +60,17 @@ final class AuthController
         if ($user === null || !$this->users->verifyPassword($user, $password)) {
             $_SESSION['_old'] = ['login' => $login];
             flash('error', 'Wrong username/email or password.');
-            redirect('login');
+            redirect('login/' . $scope);
+        }
+        // Enforce the portal: an admin account cannot sign in through the
+        // student page, and a student account cannot use the admin page.
+        if ($scope === 'admin' && $user['role'] !== 'admin') {
+            flash('error', 'That account is not an admin account. Use the student login instead.');
+            redirect('login/student');
+        }
+        if ($scope === 'student' && !in_array($user['role'], ['student', 'teacher', 'scheduler', 'viewer'], true)) {
+            flash('error', 'That is an admin account. Use the admin login instead.');
+            redirect('login/admin');
         }
         unset($_SESSION['_old']);
         Auth::login($user);
@@ -52,11 +92,15 @@ final class AuthController
             flash('error', 'Invalid request. Please try again.');
             redirect('register');
         }
+        // Registration is for students/teachers only — nobody can
+        // self-register as an admin.
+        $role = in_array($_POST['role'] ?? '', ['student', 'teacher'], true)
+            ? $_POST['role'] : 'student';
         $data = [
             'username'     => trim((string) ($_POST['username'] ?? '')),
             'email'        => trim((string) ($_POST['email'] ?? '')),
             'password'     => (string) ($_POST['password'] ?? ''),
-            'role'         => in_array($_POST['role'] ?? '', User::ROLES, true) ? $_POST['role'] : 'student',
+            'role'         => $role,
             'section'      => trim((string) ($_POST['section'] ?? '')) ?: null,
             'org_name'     => trim((string) ($_POST['org_name'] ?? '')) ?: null,
             'phone_number' => trim((string) ($_POST['phone_number'] ?? '')) ?: null,

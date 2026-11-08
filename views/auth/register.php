@@ -15,9 +15,9 @@
     <select name="role">
       <option value="student">Student</option>
       <option value="teacher">Teacher</option>
-      <option value="admin">Admin</option>
     </select>
   </label>
+  <p class="muted">Admin accounts are created by an admin on the Users page — you can't register as one.</p>
   <label>Section (optional, for students)
     <input type="text" name="section" placeholder="BSIT-1A" value="<?= old('section') ?>">
   </label>

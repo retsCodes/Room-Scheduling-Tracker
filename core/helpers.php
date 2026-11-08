@@ -8,11 +8,54 @@ function e(?string $value): string
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * The URL path of the folder this project lives in, detected at runtime
+ * so the app works no matter what the folder is called.
+ *
+ * Examples:
+ *   http://localhost/index.php            -> ''        (project at web root)
+ *   http://localhost/Room-Scheduling-Tracker/index.php
+ *                                          -> '/Room-Scheduling-Tracker'
+ *   http://localhost/my-school-app/index.php
+ *                                          -> '/my-school-app'
+ *
+ * Rename the XAMPP folder freely — no code or config change is needed.
+ * An APP_URL with a path (e.g. APP_URL=http://localhost/MyFolder)
+ * overrides the detection.
+ */
+function base_path(): string
+{
+    static $base = null;
+    if ($base !== null) {
+        return $base;
+    }
+    $base = '';
+    $appUrl = getenv('APP_URL');
+    if ($appUrl !== false && $appUrl !== '') {
+        $p = parse_url($appUrl, PHP_URL_PATH);
+        if (is_string($p) && $p !== '') {
+            $base = rtrim($p, '/');
+        }
+    } elseif (isset($_SERVER['SCRIPT_NAME'])) {
+        $script = str_replace('\\', '/', (string) $_SERVER['SCRIPT_NAME']);
+        if (basename($script) === 'index.php') {
+            $dir = rtrim(dirname($script), '/');
+            $base = ($dir === '/' || $dir === '.' || $dir === '\\') ? '' : $dir;
+        }
+    }
+    return $base;
+}
+
+/**
+ * Build a URL inside the app, prefixed with the detected base path.
+ * Use this for EVERY link, form action, redirect and asset — never write
+ * a leading '/' by hand, or it will break when the project lives in a
+ * subfolder (the usual XAMPP setup).
+ */
 function url(string $path = ''): string
 {
-    // index.php lives at the project root, so a plain root-relative path
-    // is correct in the normal setup.
-    return '/' . ltrim($path, '/');
+    $path = ltrim($path, '/');
+    return base_path() . ($path === '' ? '/' : '/' . $path);
 }
 
 function redirect(string $path): never

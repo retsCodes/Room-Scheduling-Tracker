@@ -7,6 +7,7 @@ Book rooms, see who's using a room right now on a floor map, check availability,
 ## What it does
 
 - **Auth & roles** — register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student` (plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. Admins manage maps, rooms and users; teachers/students can book.
+- **Separate logins** — admin and student logins are different pages, not one form: `/login` is a chooser, `/login/admin` only accepts admin accounts, `/login/student` is for students (teachers log in there too). An admin account is rejected on the student page and vice versa.
 - **Floor maps** — CRUD for maps (`tblMaps`: name, floor, width/height, background image, status). Each map renders as an interactive SVG: rooms are drawn from their `shape_data` JSON (rectangle / polygon / path) and coloured green/red by whether they are free or busy right now.
 - **Rooms** — CRUD for rooms (`tblRooms`), with shape JSON, description and `active` / `unavailable` status.
 - **Schedules** — CRUD with recurrence: `one_time`, `daily`, `weekly` (pick weekdays, 1=Mon…7=Sun via `tblScheduleDays`), `monthly`. Saving a schedule materialises its occurrences in `tblScheduleOccurrences`.
@@ -81,11 +82,31 @@ php -S localhost:8000
 
 Demo logins after `seed.sql` (password for all three: **`password123`** — change them before going live):
 
-| Username | Email | Role |
-|---|---|---|
-| `admin` | admin@example.com | admin |
-| `jdoe` | jdoe@example.com | teacher |
-| `ana` | ana@example.com | student, BSIT-1A |
+| Username | Email | Role | Login page |
+|---|---|---|---|
+| `admin` | admin@example.com | admin | `/login/admin` |
+| `jdoe` | jdoe@example.com | teacher | `/login/student` |
+| `ana` | ana@example.com | student, BSIT-1A | `/login/student` |
+
+## Folder name / XAMPP — it just works
+
+The project folder can be called anything — `room-scheduling-tracker`,
+`Room-Scheduling-Tracker`, `my-app`, whatever you rename it to in `htdocs`.
+No folder name is written anywhere in the code: every link, redirect and
+stylesheet/script URL goes through `url()` in `core/helpers.php`, which
+detects the folder from the running script (`base_path()`), and the router
+in `index.php` strips that same prefix before matching routes. If you ever
+need to force it, set `APP_URL=http://localhost/MyFolder` in `.env`.
+
+Clean URLs (`/login/admin`, `/schedules`, …) are handled by `.htaccess`
+at the project root (Apache `mod_rewrite`, on by default in XAMPP).
+If the design (CSS) is not showing, or pages 404 in XAMPP, check these:
+1. Open the project through the folder URL, e.g.
+   `http://localhost/Room-Scheduling-Tracker/login` — not `http://localhost/login`.
+2. In XAMPP `httpd.conf`, `mod_rewrite` must be loaded and `AllowOverride All`
+   set for `htdocs` (both are defaults). Without rewrite, the app still works
+   with URLs like `http://localhost/Room-Scheduling-Tracker/index.php/schedules`.
+3. Hard-refresh the browser (Ctrl+F5) so a cached unstyled page is replaced.
 
 Seed data also includes: Main Building Floor 1 + Floor 2, Rooms 101–103 / 201–202, a weekly IT Department Meeting (Mondays 09:00–10:30, Room 101), a BSIT-1A lecture (Mon/Wed/Fri 13:00–14:30, Room 102), a one-time CSS org meeting, and a skipped occurrence on 2026-11-09 — the examples from the spreadsheet.
 
