@@ -16,7 +16,7 @@ if ($current === '') {
     $base = trim(base_path(), '/');
     if ($base !== '' && str_starts_with($reqPath, $base)) { $reqPath = trim(substr($reqPath, strlen($base)), '/'); }
     $seg = explode('/', $reqPath)[0] ?? '';
-    $current = match ($seg) { '', 'index.php' => 'dashboard', 'maps' => 'maps', 'rooms' => 'rooms', 'schedules' => 'schedules', 'calendar' => 'calendar', 'availability' => 'availability', 'occurrences' => 'occurrences', 'users' => 'users', default => $seg };
+    $current = match ($seg) { '', 'index.php' => 'dashboard', 'maps' => 'maps', 'rooms' => 'rooms', 'schedules' => 'schedules', 'calendar' => 'calendar', 'availability' => 'availability', 'occurrences' => 'occurrences', 'users' => 'users', 'profile' => 'profile', default => $seg };
 }
 ?>
 <?php if ($loggedIn): ?>
@@ -25,15 +25,20 @@ if ($current === '') {
     <a class="brand" href="<?= url('') ?>"><span class="brand-mark">R</span> Room Scheduling<br>Tracker</a>
     <nav>
       <a href="<?= url('') ?>" class="<?= $current === 'dashboard' ? 'active' : '' ?>"><span class="nav-icon">🏠</span> Dashboard</a>
+      <p class="nav-section">Campus Map</p>
       <a href="<?= url('maps') ?>" class="<?= $current === 'maps' ? 'active' : '' ?>"><span class="nav-icon">🗺️</span> Campus Map</a>
+      <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
+      <p class="nav-section">Schedule</p>
       <a href="<?= url('schedules') ?>" class="<?= $current === 'schedules' ? 'active' : '' ?>"><span class="nav-icon">📅</span> Schedules</a>
       <a href="<?= url('calendar') ?>" class="<?= $current === 'calendar' ? 'active' : '' ?>"><span class="nav-icon">🗓️</span> Calendar</a>
       <a href="<?= url('availability') ?>" class="<?= $current === 'availability' ? 'active' : '' ?>"><span class="nav-icon">🔍</span> Availability</a>
       <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">📌</span> Occurrences</a>
-      <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
       <?php if ($isAdmin): ?>
+      <p class="nav-section">Admin</p>
       <a href="<?= url('users') ?>" class="<?= $current === 'users' ? 'active' : '' ?>"><span class="nav-icon">👥</span> User List</a>
       <?php endif; ?>
+      <p class="nav-section">Account</p>
+      <a href="<?= url('profile') ?>" class="<?= $current === 'profile' ? 'active' : '' ?>"><span class="nav-icon">👤</span> My Profile</a>
     </nav>
     <div class="sidebar-foot">
       <span class="user-chip"><?= e(\App\Core\Auth::user()['username'] ?? '') ?> <small><?= e(\App\Core\Auth::role() ?? '') ?><?= \App\Core\Auth::role() === 'officer' ? ' (org officer)' : '' ?></small></span>

@@ -8,9 +8,9 @@
         ? 'For administrators only — manage maps, rooms, schedules and users.'
         : 'Log in to check room schedules and see what\'s free right now.' ?>
       <?php if ($isAdmin): ?>
-        <br>Demo account: <code>admin</code> / <code>password123</code>
+        <br><span class="muted">Demo: <code>admin</code> / <code>password123</code></span>
       <?php else: ?>
-        <br>Demo: <code>ana</code> / <code>password123</code> (student), <code>jdoe</code> / <code>password123</code> (teacher), <code>officer</code> / <code>password123</code> (org officer)
+        <br><span class="muted">Demo: <code>ana</code> / <code>password123</code></span>
       <?php endif; ?>
     </p>
     <form method="post" action="<?= url('login/' . ($isAdmin ? 'admin' : 'student')) ?>" class="form">

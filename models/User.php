@@ -85,6 +85,22 @@ final class User
         );
     }
 
+    /** Profile edit: the user edits their own details (role is never editable here). */
+    public function updateProfile(int $id, array $data): void
+    {
+        $this->db->run(
+            'UPDATE tblUsers SET username = ?, email = ?, section = ?, org_name = ?, phone_number = ?
+             WHERE user_id = ?',
+            [$data['username'], $data['email'], $data['section'] ?? null,
+             $data['org_name'] ?? null, $data['phone_number'] ?? null, $id]
+        );
+    }
+
+    public function updateProfileImg(int $id, ?string $path): void
+    {
+        $this->db->run('UPDATE tblUsers SET profile_img = ? WHERE user_id = ?', [$path, $id]);
+    }
+
     public function delete(int $id): void
     {
         $this->db->run('DELETE FROM tblUsers WHERE user_id = ?', [$id]);

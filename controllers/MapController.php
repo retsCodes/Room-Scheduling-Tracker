@@ -160,6 +160,73 @@ final class MapController
         echo json_encode(['ok' => true, 'saved' => $saved, 'created' => $created, 'deleted' => is_array($deleted) ? count($deleted) : 0]);
     }
 
+    /**
+     * Import rooms from a JSON file (Figma Map View: Import). Accepts the
+     * format exportMap() produces: {"map": {...}, "rooms": [...]} or a bare
+     * rooms array. Rooms are matched by room_id, then by room_name — matched
+     * rooms are updated, the rest are created. Nothing is deleted.
+     */
+    public function importMap(int $id): void
+    {
+        Auth::requireAdmin();
+        $map = $this->maps->find($id);
+        if ($map === null) {
+            flash('error', 'Map not found.');
+            redirect('maps');
+        }
+        if (!is_post() || !verify_csrf()) {
+            flash('error', 'Invalid request.');
+            redirect('maps/' . $id . '/editor');
+        }
+        $file = $_FILES['import_file'] ?? null;
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            flash('error', 'Choose a JSON file to import.');
+            redirect('maps/' . $id . '/editor');
+        }
+        $data = json_decode((string) file_get_contents($file['tmp_name']), true);
+        $rooms = is_array($data) ? ($data['rooms'] ?? $data) : null;
+        if (!is_array($rooms)) {
+            flash('error', 'That file is not a valid map JSON export.');
+            redirect('maps/' . $id . '/editor');
+        }
+        $existing = $this->rooms->all($id);
+        $byId = [];
+        $byName = [];
+        foreach ($existing as $ex) {
+            $byId[(int) $ex['room_id']] = $ex;
+            $byName[strtolower(trim($ex['room_name']))] = $ex;
+        }
+        $saved = 0; $created = 0;
+        foreach ($rooms as $r) {
+            if (!is_array($r) || trim((string) ($r['room_name'] ?? '')) === '') continue;
+            $shape = $r['shape_data'] ?? [];
+            if (is_string($shape)) $shape = json_decode($shape, true) ?: [];
+            $data = [
+                'map_id' => $id,
+                'room_name' => trim((string) $r['room_name']),
+                'shape_type' => in_array($r['shape_type'] ?? '', Room::SHAPE_TYPES, true) ? $r['shape_type'] : 'rectangle',
+                'shape_data' => json_encode($shape),
+                'room_description' => trim((string) ($r['room_description'] ?? '')) ?: null,
+                'room_status' => in_array($r['room_status'] ?? '', Room::STATUSES, true) ? $r['room_status'] : 'active',
+            ];
+            $match = null;
+            if (!empty($r['room_id']) && isset($byId[(int) $r['room_id']])) {
+                $match = $byId[(int) $r['room_id']];
+            } elseif (isset($byName[strtolower($data['room_name'])])) {
+                $match = $byName[strtolower($data['room_name'])];
+            }
+            if ($match) {
+                $this->rooms->update((int) $match['room_id'], $data);
+                $saved++;
+            } else {
+                $this->rooms->create($data);
+                $created++;
+            }
+        }
+        flash('success', "Import done: $saved updated, $created new rooms.");
+        redirect('maps/' . $id . '/editor');
+    }
+
     /** Download the map + its rooms as JSON (Figma Map View: Export). */
     public function exportMap(int $id): void
     {

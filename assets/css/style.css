@@ -100,6 +100,11 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 }
 .sidebar nav a:hover { background: rgba(255, 255, 255, .14); color: #fff; text-decoration: none; transform: translateX(2px); }
 .sidebar nav a.active { background: rgba(255, 255, 255, .22); color: #fff; font-weight: 700; box-shadow: inset 3px 0 0 #fff; }
+.sidebar .nav-section {
+  margin: .9rem .8rem .3rem; font-size: .72rem; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .6);
+}
+.sidebar .nav-section:first-child { margin-top: .2rem; }
 .sidebar .nav-icon { width: 1.25rem; text-align: center; font-size: 1.05rem; }
 .sidebar-foot { padding: .9rem .8rem; border-top: 1px solid rgba(255, 255, 255, .18); }
 .sidebar-foot .user-chip { display: block; color: #fff; font-size: .9rem; margin-bottom: .6rem; }
@@ -298,7 +303,57 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .timeline-block.tl-grey { background: var(--grey); }
 .timeline-scale { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); padding: .2rem .1rem 0 90px; }
 
+/* --- Calendar (month grid) --------------------------------------------------- */
+.calendar {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: .9rem;
+  animation: fadeUp .45s ease both;
+}
+.cal-head {
+  text-align: center; font-size: .8rem; font-weight: 800; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--muted); padding: .45rem 0;
+}
+.cal-day {
+  min-height: 96px; border: 1px solid var(--border); border-radius: 10px;
+  padding: .45rem .5rem; background: #fff; font-size: .88rem;
+  display: flex; flex-direction: column; gap: 3px; overflow: hidden;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.cal-day:hover { border-color: var(--blue-500); box-shadow: var(--shadow); transform: translateY(-1px); }
+.cal-day strong { font-size: .95rem; }
+.cal-day.cal-empty { background: #f8fafc; border-style: dashed; }
+.cal-day.cal-today { border: 2px solid var(--blue-600); background: var(--blue-50); }
+.cal-day.cal-today strong { color: var(--blue-700); }
+.cal-event {
+  display: block; background: var(--blue-100); color: var(--blue-700);
+  border-radius: 6px; padding: .15rem .4rem; font-size: .78rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background .18s ease;
+}
+.cal-event:hover { background: var(--blue-500); color: #fff; text-decoration: none; }
+.cal-event.cal-cancelled { background: var(--red-bg); color: var(--red-dark); text-decoration: line-through; }
+
 /* --- Map editor (admin) ----------------------------------------------------- */
+.editor-wrap { position: relative; }
+.editor-tools {
+  position: absolute; left: .7rem; top: .7rem; z-index: 5;
+  display: flex; flex-direction: column; gap: .45rem;
+}
+.tool-btn {
+  width: 38px; height: 38px; border-radius: 10px; background: #fff;
+  border: 1px solid var(--border); font-size: 1.05rem; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--text);
+  box-shadow: var(--shadow); transition: all .18s ease; text-decoration: none;
+}
+.tool-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); text-decoration: none; }
+.tool-btn.active { background: var(--blue-700); color: #fff; border-color: transparent; }
+.tool-btn.tool-back { background: #111827; color: #fff; border-color: #111827; }
+.editor-legend {
+  display: flex; gap: 1.4rem; justify-content: center; flex-wrap: wrap;
+  padding: .8rem 0 .1rem; font-size: .9rem; color: var(--muted);
+}
+.editor-legend span { display: flex; align-items: center; gap: .45rem; }
 .editor-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.1rem; align-items: start; }
 .editor-room { cursor: grab; }
 .editor-room:active { cursor: grabbing; }
@@ -311,6 +366,16 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .props-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
 .editor-hint { font-size: .85rem; color: var(--muted); }
 .unsaved-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--amber); margin-right: .4rem; }
+
+/* --- Profile ----------------------------------------------------------------- */
+.profile-side { text-align: center; }
+.avatar {
+  width: 140px; height: 140px; margin: 0 auto 1rem; border-radius: 50%;
+  background: var(--blue-50); border: 3px solid var(--blue-100);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-silhouette { font-size: 5rem; line-height: 1; color: var(--blue-900); }
 
 /* --- Responsive -------------------------------------------------------------- */
 @media (max-width: 900px) {

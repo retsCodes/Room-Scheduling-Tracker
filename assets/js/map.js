@@ -57,8 +57,13 @@
     });
   }
 
+  // Clicking a room opens its details page. Hovering/selecting still
+  // previews it in the side panel (the first room is pre-selected on load).
   shapes.forEach(function (shape) {
-    shape.addEventListener('click', function () { selectRoom(shape); });
+    shape.addEventListener('click', function () {
+      window.location.href = meta.roomUrl + shape.getAttribute('data-room-id');
+    });
+    shape.addEventListener('mouseenter', function () { selectRoom(shape); });
   });
 
   // Quick search: dim rooms that don't match.

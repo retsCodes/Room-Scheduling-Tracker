@@ -45,6 +45,7 @@ use App\Controllers\AvailabilityController;
 use App\Controllers\DashboardController;
 use App\Controllers\MapController;
 use App\Controllers\OccurrenceController;
+use App\Controllers\ProfileController;
 use App\Controllers\RoomController;
 use App\Controllers\ScheduleController;
 use App\Controllers\UserController;
@@ -95,6 +96,7 @@ $scheduleCtl = new ScheduleController($db, $schedules, $occurrences, $exceptions
 $occCtl      = new OccurrenceController($occurrences);
 $availCtl    = new AvailabilityController($availability, $rooms, $maps);
 $userCtl     = new UserController($users);
+$profileCtl  = new ProfileController($users);
 
 // --- Routing -----------------------------------------------------------------
 // $path is the URL path inside the app (e.g. "schedules/25/edit").
@@ -157,6 +159,16 @@ try {
         $auth->register();
     } elseif ($path === 'logout' && $isPost) {
         $auth->logout();
+    } elseif ($path === 'profile' && !$isPost) {
+        $profileCtl->show();
+    } elseif ($path === 'profile' && $isPost) {
+        $profileCtl->update();
+    } elseif ($path === 'profile/password' && $isPost) {
+        $profileCtl->changePassword();
+    } elseif ($path === 'profile/avatar' && $isPost) {
+        $profileCtl->uploadAvatar();
+    } elseif ($path === 'profile/delete' && $isPost) {
+        $profileCtl->deleteAccount();
     } elseif ($path === 'maps' && !$isPost) {
         $mapCtl->index();
     } elseif ($path === 'maps' && $isPost) {
@@ -177,6 +189,8 @@ try {
         $mapCtl->saveLayout((int) $p['id']);
     } elseif (($p = $match($segments, 'maps/{id}/export')) && !$isPost) {
         $mapCtl->exportMap((int) $p['id']);
+    } elseif (($p = $match($segments, 'maps/{id}/import')) && $isPost) {
+        $mapCtl->importMap((int) $p['id']);
     } elseif ($path === 'rooms' && !$isPost) {
         $roomCtl->index();
     } elseif ($path === 'rooms' && $isPost) {

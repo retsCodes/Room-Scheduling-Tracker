@@ -119,7 +119,8 @@
     document.getElementById('prop-shape').textContent = r.shape_type;
     var d = r.shape_data || {};
     var isRect = r.shape_type === 'rectangle';
-    document.getElementById('prop-size-row').style.display = isRect ? '' : 'none';
+    document.getElementById('prop-w').disabled = !isRect;
+    document.getElementById('prop-h').disabled = !isRect;
     document.getElementById('prop-shape-note').style.display = isRect ? 'none' : '';
     if (isRect) {
       document.getElementById('prop-x').value = +d.x || 0;
@@ -168,14 +169,47 @@
     markUnsaved();
   });
 
-  document.getElementById('add-room').addEventListener('click', function () {
+  // (The + tool in the toolbar adds rooms by clicking the map; see addRoomAt.)
+
+  /* --- tools: select / add-room, zoom, fullscreen ------------------------ */
+  var tool = 'select';
+  var toolSelectBtn = document.getElementById('tool-select');
+  var toolAddBtn = document.getElementById('tool-add');
+  function setTool(t) {
+    tool = t;
+    if (toolSelectBtn) toolSelectBtn.classList.toggle('active', t === 'select');
+    if (toolAddBtn) toolAddBtn.classList.toggle('active', t === 'add');
+  }
+  if (toolSelectBtn) toolSelectBtn.addEventListener('click', function () { setTool('select'); });
+  if (toolAddBtn) toolAddBtn.addEventListener('click', function () { setTool('add'); });
+
+  var zoom = 1;
+  function applyZoom() {
+    svg.style.width = Math.round(zoom * 100) + '%';
+    svg.style.height = 'auto';
+  }
+  var zoomIn = document.getElementById('zoom-in');
+  var zoomOut = document.getElementById('zoom-out');
+  if (zoomIn) zoomIn.addEventListener('click', function () { zoom = Math.min(2.5, zoom + 0.25); applyZoom(); });
+  if (zoomOut) zoomOut.addEventListener('click', function () { zoom = Math.max(0.5, zoom - 0.25); applyZoom(); });
+  var fsBtn = document.getElementById('fullscreen-btn');
+  var fsWrap = document.getElementById('editor-map-wrap');
+  if (fsBtn && fsWrap) {
+    fsBtn.addEventListener('click', function () {
+      if (document.fullscreenElement) { document.exitFullscreen(); }
+      else if (fsWrap.requestFullscreen) { fsWrap.requestFullscreen(); }
+    });
+  }
+
+  function addRoomAt(p) {
     var r = { room_id: tempId--, room_name: 'New Room', shape_type: 'rectangle',
-      shape_data: { x: 60, y: 60, width: 160, height: 100 }, room_description: '', room_status: 'active' };
+      shape_data: { x: Math.max(0, snap(p.x - 80)), y: Math.max(0, snap(p.y - 50)), width: 160, height: 100 },
+      room_description: '', room_status: 'active' };
     rooms.push(r);
     renderAll();
     select(r.room_id);
     markUnsaved();
-  });
+  }
 
   /* --- dragging ---------------------------------------------------------- */
   function svgPoint(evt) {
@@ -185,6 +219,13 @@
   }
   var drag = null;
   svg.addEventListener('pointerdown', function (e) {
+    // Add-room tool: click empty canvas to place a new room.
+    if (tool === 'add' && e.target === svg) {
+      addRoomAt(svgPoint(e));
+      setTool('select');
+      e.preventDefault();
+      return;
+    }
     var handle = e.target.closest ? e.target.closest('.editor-handle') : null;
     var group = e.target.closest ? e.target.closest('.editor-room') : null;
     if (!group) return;
