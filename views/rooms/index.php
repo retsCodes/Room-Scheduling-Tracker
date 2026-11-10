@@ -2,7 +2,7 @@
 <div class="page-head">
   <div>
     <h1>🏫 All Rooms</h1>
-    <p class="muted">schedule overview — pick a day, then a room.</p>
+    <p class="muted">schedule overview - pick a day, then a room.</p>
   </div>
   <?php if (\App\Core\Auth::isAdmin()): ?><a class="btn btn-primary" href="<?= url('rooms/create') ?>">+ New room</a><?php endif; ?>
 </div>
@@ -80,8 +80,8 @@ $qs = fn(array $extra) => url('rooms?' . http_build_query(array_filter(array_mer
           </div>
           <span class="floor-pill"><?= e(ordinal((int) $r['floor_number'])) ?> floor</span>
           <div class="room-card-meta">
-            <span>🕐 <?= $c['booking'] ? e($c['booking']['time']) : '—' ?></span>
-            <span>👥 <?= $c['booking'] ? e($c['booking']['organizer']) : '—' ?></span>
+            <span>🕐 <?= $c['booking'] ? e($c['booking']['time']) : '-' ?></span>
+            <span>👥 <?= $c['booking'] ? e($c['booking']['organizer']) : '-' ?></span>
           </div>
           <?php if ($c['booking']): ?><p class="muted room-card-title"><?= e($c['booking']['title']) ?></p><p style="margin:.3rem 0 0"><?= $c['booking']['confirmed'] ? '<span class="badge badge-green">✓ Admin confirmed</span>' : '<span class="badge badge-amber">Awaiting confirmation</span>' ?></p><?php endif; ?>
         </a>

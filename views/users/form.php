@@ -1,4 +1,4 @@
-<h1>Edit user — <?= e($user['username']) ?></h1>
+<h1>Edit user - <?= e($user['username']) ?></h1>
 <form method="post" action="<?= url('users/' . (int) $user['user_id']) ?>" class="card form">
   <?= csrf_field() ?>
   <label>Username <input type="text" name="username" required value="<?= e($user['username']) ?>"></label>

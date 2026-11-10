@@ -74,7 +74,7 @@ final class UserController
             $this->users->delete($id);
             flash('success', 'User deleted.');
         } catch (\Throwable $e) {
-            flash('error', 'Cannot delete this user — they still own schedules.');
+            flash('error', 'Cannot delete this user - they still own schedules.');
         }
         redirect('users');
     }

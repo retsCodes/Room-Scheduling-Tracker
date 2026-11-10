@@ -90,7 +90,7 @@ final class MapController
             }
         }
         view('maps/editor', [
-            'title' => 'Edit map layout — ' . $map['map_name'],
+            'title' => 'Edit map layout - ' . $map['map_name'],
             'map' => $map, 'maps' => $this->maps->all(true),
             'rooms' => $this->rooms->all($id), 'busy' => $busyIds,
             'today' => $today,

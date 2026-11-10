@@ -20,7 +20,7 @@
           <option value="teacher">Teacher</option>
         </select>
       </label>
-      <p class="muted">Org officers are set by an admin on the Users page — you can't register as one.</p>
+      <p class="muted">Org officers are set by an admin on the Users page - you can't register as one.</p>
       <label>Section (optional, for students)
         <input type="text" name="section" placeholder="BSIT-1A" value="<?= old('section') ?>">
       </label>

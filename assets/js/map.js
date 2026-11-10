@@ -31,7 +31,7 @@
     panelDesc.innerHTML = statusBadge(status) + (desc ? ' ' + escapeHtml(desc) : '');
     var list = bookings[id] || [];
     if (!list.length) {
-      panelBody.innerHTML = '<p class="muted" style="margin-top:.6rem">No bookings today — free all day.</p>';
+      panelBody.innerHTML = '<p class="muted" style="margin-top:.6rem">No bookings today - free all day.</p>';
     } else {
       var html = '<ul class="clean-list" style="margin-top:.6rem">';
       list.forEach(function (b) {

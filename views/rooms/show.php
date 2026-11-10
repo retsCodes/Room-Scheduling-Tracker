@@ -39,7 +39,7 @@ $heroBadge = [
   </section>
 
   <section class="card">
-    <h2>⏱️ Timeline — today, <?= e(date('l, F j', strtotime($today))) ?></h2>
+    <h2>⏱️ Timeline - today, <?= e(date('l, F j', strtotime($today))) ?></h2>
     <?php
     $toMin = fn(string $t): int => (int) substr($t, 0, 2) * 60 + (int) substr($t, 3, 2);
     $tlStart = 7 * 60; $tlEnd = 19 * 60;
@@ -60,7 +60,7 @@ $heroBadge = [
     $tlClass = fn(string $s): string => $s === 'cancelled' ? 'tl-red' : ($s === 'completed' ? 'tl-green' : 'tl-blue');
     ?>
     <?php if (empty($today_occ)): ?>
-      <p class="muted">Nothing booked today — this room is free all day.</p>
+      <p class="muted">Nothing booked today - this room is free all day.</p>
     <?php else: ?>
       <div class="timeline">
         <?php foreach ($today_occ as $occ):

@@ -124,6 +124,7 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .guest-topbar .brand:hover { text-decoration: none; }
 
 .card {
+  display: block;
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 1.1rem 1.25rem; margin-bottom: 1.1rem;
@@ -175,7 +176,7 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .flash-success { background: var(--green-bg); color: #14532d; border: 1px solid #86efac; }
 .flash-error { background: var(--red-bg); color: #7f1d1d; border: 1px solid #fca5a5; }
 
-.table { width: 100%; border-collapse: collapse; background: #fff; }
+.table { display: table; width: 100%; border-collapse: collapse; background: #fff; }
 .table th, .table td { padding: .65rem .8rem; text-align: left; border-bottom: 1px solid var(--border); font-size: .93rem; }
 .table th { background: #f8fafc; color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
 .table tbody tr { transition: background .18s ease; }
@@ -202,7 +203,8 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
   background: #fff; transition: border-color .2s ease, box-shadow .2s ease;
 }
 .form input:focus, .form select:focus, .form textarea:focus { outline: none; border-color: var(--blue-500); box-shadow: 0 0 0 3px var(--blue-100); }
-.form-inline { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+.form-inline { display: flex; flex-direction: row; gap: .6rem; flex-wrap: wrap; align-items: center; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 .form-inline input, .form-inline select { width: auto; }
 .danger-zone { border-color: #fecaca; background: #fff7f7; }
 

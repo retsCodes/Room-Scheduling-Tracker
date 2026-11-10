@@ -1,5 +1,5 @@
 <h1><?= $schedule ? 'Edit schedule' : 'New schedule' ?></h1>
-<p class="muted">Overlapping bookings are allowed — an admin confirms which one goes ahead.</p>
+<p class="muted">Overlapping bookings are allowed - an admin confirms which one goes ahead.</p>
 <form method="post" action="<?= $schedule ? url('schedules/' . (int) $schedule['schedule_id']) : url('schedules') ?>" class="card form">
   <?= csrf_field() ?>
   <label>Title
@@ -11,7 +11,7 @@
   <label>Room
     <select name="room_id" required>
       <?php foreach ($rooms as $r): ?>
-        <option value="<?= (int) $r['room_id'] ?>" <?= (int) ($schedule['room_id'] ?? $prefill['room_id'] ?? 0) === (int) $r['room_id'] ? 'selected' : '' ?>><?= e($r['room_name']) ?> — <?= e($r['map_name']) ?></option>
+        <option value="<?= (int) $r['room_id'] ?>" <?= (int) ($schedule['room_id'] ?? $prefill['room_id'] ?? 0) === (int) $r['room_id'] ? 'selected' : '' ?>><?= e($r['room_name']) ?> - <?= e($r['map_name']) ?></option>
       <?php endforeach; ?>
     </select>
   </label>

@@ -97,9 +97,14 @@
     }
   }
 
+  var discardBtn = document.getElementById('discard-layout');
+  function setUnsaved(v) {
+    unsaved = v;
+    unsavedDot.style.display = v ? 'inline-block' : 'none';
+    if (discardBtn) discardBtn.disabled = !v;
+  }
   function markUnsaved() {
-    unsaved = true;
-    unsavedDot.style.display = 'inline-block';
+    setUnsaved(true);
     statusEl.textContent = 'Unsaved changes.';
   }
   function boundsOf(r) {
@@ -218,8 +223,7 @@
       rooms = JSON.parse(JSON.stringify(originalRooms));
       deleted = [];
       selectedId = null;
-      unsaved = false;
-      unsavedDot.style.display = 'none';
+      setUnsaved(false);
       statusEl.textContent = 'All changes saved.';
       propsForm.style.display = 'none'; propsEmpty.style.display = '';
       renderAll();
@@ -343,8 +347,7 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data.ok) { statusEl.textContent = 'Save failed: ' + (data.error || 'unknown error'); return; }
-        unsaved = false;
-        unsavedDot.style.display = 'none';
+        setUnsaved(false);
         statusEl.textContent = 'Saved (' + data.saved + ' updated, ' + data.created + ' new, ' + data.deleted + ' deleted).';
         setTimeout(function () { window.location.reload(); }, 700);
       })

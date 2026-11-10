@@ -16,7 +16,7 @@ foreach ($rooms as $r) {
 <div class="page-head">
   <div>
     <h1><?= e($map['map_name']) ?></h1>
-    <p class="muted">Map editor — drag rooms to move them, drag the white corner dot to resize.</p>
+    <p class="muted">Map editor - drag rooms to move them, drag the white corner dot to resize.</p>
   </div>
   <div>
     <a class="btn" href="<?= url('maps/' . (int) $map['map_id'] . '/export') ?>">EXPORT</a>
@@ -34,7 +34,7 @@ foreach ($rooms as $r) {
       <div class="editor-tools">
         <a class="tool-btn tool-back" href="<?= url('maps/' . (int) $map['map_id']) ?>" title="Back to map">←</a>
         <button class="tool-btn active" type="button" id="tool-select" title="Select / move rooms">▢</button>
-        <button class="tool-btn tool-add" type="button" id="tool-add" title="Add room — then click the map">▣</button>
+        <button class="tool-btn tool-add" type="button" id="tool-add" title="Add room - then click the map">▣</button>
         <button class="tool-btn" type="button" id="zoom-in" title="Zoom in">＋</button>
         <button class="tool-btn" type="button" id="zoom-out" title="Zoom out">－</button>
         <button class="tool-btn" type="button" id="fullscreen-btn" title="Fullscreen">⛶</button>
@@ -71,6 +71,7 @@ foreach ($rooms as $r) {
   <aside class="card props-panel" id="props-panel">
     <h2>Room Properties</h2>
     <p class="muted" id="props-empty">Click a room on the map to edit it.</p>
+    <button class="btn" type="button" id="discard-layout" style="width:100%;margin-bottom:.7rem" disabled>Discard changes</button>
     <div id="props-form" style="display:none">
       <label>Room Name <input type="text" id="prop-name" maxlength="100"></label>
       <div class="props-row">
@@ -81,7 +82,7 @@ foreach ($rooms as $r) {
         <label>X position (px) <input type="number" id="prop-x" step="10" min="0"></label>
         <label>Y position (px) <input type="number" id="prop-y" step="10" min="0"></label>
       </div>
-      <p class="editor-hint" id="prop-shape-note" style="display:none">Only rectangles can be resized here — use the room form for exact points.</p>
+      <p class="editor-hint" id="prop-shape-note" style="display:none">Only rectangles can be resized here - use the room form for exact points.</p>
       <label>Status
         <select id="prop-status">
           <option value="active">● Available</option>
@@ -97,7 +98,6 @@ foreach ($rooms as $r) {
         </select>
       </label>
       <button class="btn btn-primary" type="button" id="save-layout" style="width:100%;padding:.7rem"><span id="unsaved-dot" class="unsaved-dot" style="display:none"></span>Save Changes</button>
-      <button class="btn" type="button" id="discard-layout" style="width:100%;margin-top:.5rem">Discard changes</button>
       <p style="text-align:center;margin-top:.6rem"><button class="btn btn-small btn-danger" type="button" id="delete-room">Delete room</button></p>
     </div>
   </aside>

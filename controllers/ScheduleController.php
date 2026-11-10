@@ -58,7 +58,7 @@ final class ScheduleController
             $byDate[$occ['occurrence_date']][] = $occ;
         }
         view('schedules/calendar', [
-            'title' => 'Calendar — ' . date('F Y', strtotime($first)),
+            'title' => 'Calendar - ' . date('F Y', strtotime($first)),
             'month' => $month, 'first' => $first, 'by_date' => $byDate,
             'rooms' => $this->rooms->all(), 'room_id' => $roomId,
         ]);
@@ -128,7 +128,7 @@ final class ScheduleController
         }
         $msg = 'Schedule created with ' . count($dates) . ' occurrence(s).';
         if ($conflicts) {
-            $msg .= ' It overlaps ' . count($conflicts) . ' existing booking(s) — an admin can confirm which one goes ahead.';
+            $msg .= ' It overlaps ' . count($conflicts) . ' existing booking(s) - an admin can confirm which one goes ahead.';
         }
         flash('success', $msg);
         redirect('schedules/' . $id);
@@ -187,7 +187,7 @@ final class ScheduleController
         }
         $msg = 'Schedule updated and occurrences regenerated.';
         if ($conflicts) {
-            $msg .= ' It now overlaps ' . count($conflicts) . ' existing booking(s) — an admin can confirm which one goes ahead.';
+            $msg .= ' It now overlaps ' . count($conflicts) . ' existing booking(s) - an admin can confirm which one goes ahead.';
         }
         flash('success', $msg);
         redirect('schedules/' . $id);

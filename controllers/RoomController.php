@@ -193,7 +193,7 @@ final class RoomController
             $this->rooms->delete($id);
             flash('success', 'Room deleted.');
         } catch (\Throwable $e) {
-            flash('error', 'Cannot delete this room — it still has schedules. Cancel those first.');
+            flash('error', 'Cannot delete this room - it still has schedules. Cancel those first.');
         }
         redirect('rooms');
     }

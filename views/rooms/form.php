@@ -24,10 +24,10 @@
     <label>Width <input type="number" name="shape_w" value="260"></label>
     <label>Height <input type="number" name="shape_h" value="180"></label>
   </div>
-  <label>Shape data (JSON) — leave blank to use the X/Y/W/H above; or paste JSON
+  <label>Shape data (JSON) - leave blank to use the X/Y/W/H above; or paste JSON
     <textarea name="shape_data" rows="3" placeholder='{"type":"polygon","points":[{"x":20,"y":20},{"x":180,"y":20},{"x":180,"y":70}]}'><?= e($room['shape_data'] ?? '') ?></textarea>
   </label>
-  <p class="muted">Examples — rectangle: <code>{"type":"rectangle","x":20,"y":20,"width":260,"height":180}</code><br>
+  <p class="muted">Examples - rectangle: <code>{"type":"rectangle","x":20,"y":20,"width":260,"height":180}</code><br>
   Polygon: <code>{"type":"polygon","points":[{"x":20,"y":20},{"x":180,"y":20},{"x":180,"y":70}]}</code><br>
   Path: <code>{"type":"path","d":"M20,20 L180,20 L180,100 Q100,140 20,100 Z"}</code></p>
   <label>Description (optional)

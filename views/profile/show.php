@@ -1,5 +1,5 @@
 <h1><?= \App\Core\Auth::isAdmin() ? 'Admin Profile' : 'User Profile' ?></h1>
-<p class="muted">Your account details — only an admin can change your role.</p>
+<p class="muted">Your account details - only an admin can change your role.</p>
 
 <div class="grid-2">
   <section class="card profile-side">

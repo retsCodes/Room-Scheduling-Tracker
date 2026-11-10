@@ -37,7 +37,7 @@ $next = date('Y-m', strtotime($month . '-01 +1 month'));
     <div class="cal-day <?= $isToday ? 'cal-today' : '' ?>">
       <strong><?= $day ?></strong>
       <?php foreach (array_slice($events, 0, 3) as $ev): ?>
-        <a class="cal-event <?= $ev['occurrence_status'] === 'cancelled' ? 'cal-cancelled' : '' ?>" href="<?= url('schedules/' . (int) $ev['schedule_id']) ?>" title="<?= e($ev['schedule_title']) ?> — <?= e($ev['room_name']) ?>">
+        <a class="cal-event <?= $ev['occurrence_status'] === 'cancelled' ? 'cal-cancelled' : '' ?>" href="<?= url('schedules/' . (int) $ev['schedule_id']) ?>" title="<?= e($ev['schedule_title']) ?> - <?= e($ev['room_name']) ?>">
           <?= substr($ev['start_time'], 0, 5) ?> <?= e($ev['schedule_title']) ?>
         </a>
       <?php endforeach; ?>

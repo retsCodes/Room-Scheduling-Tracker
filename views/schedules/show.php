@@ -12,7 +12,7 @@
 <div class="card">
   <p><strong>Room:</strong> <a href="<?= url('rooms/' . (int) $schedule['room_id']) ?>"><?= e($schedule['room_name']) ?></a> (<?= e($schedule['map_name']) ?>)</p>
   <p><strong>Organizer:</strong> <?= e($schedule['organizer_name']) ?></p>
-  <p><strong>Recurrence:</strong> <?= e($schedule['recurrence_type']) ?><?php if (!empty($schedule['days'])): ?> — <?= implode(', ', array_map(fn($d) => date('l', strtotime('2026-11-0' . ($d + 1))), $schedule['days'])) ?><?php endif; ?></p>
+  <p><strong>Recurrence:</strong> <?= e($schedule['recurrence_type']) ?><?php if (!empty($schedule['days'])): ?> - <?= implode(', ', array_map(fn($d) => date('l', strtotime('2026-11-0' . ($d + 1))), $schedule['days'])) ?><?php endif; ?></p>
   <p><strong>Dates:</strong> <?= e($schedule['start_date']) ?><?= $schedule['end_date'] ? ' → ' . e($schedule['end_date']) : '' ?></p>
   <p><strong>Time:</strong> <?= time_12h($schedule['start_time']) ?>–<?= time_12h($schedule['end_time']) ?></p>
   <p><strong>Status:</strong> <?= status_badge($schedule['schedule_status']) ?></p>
@@ -87,7 +87,7 @@
     <tr>
       <td><?= e($ex['original_date']) ?></td>
       <td><?= status_badge($ex['exception_type']) ?></td>
-      <td><?= e($ex['new_date'] ?? '—') ?> <?= e($ex['new_room_name'] ?? '') ?> <?= $ex['new_start_time'] ? time_12h($ex['new_start_time']) . '–' . time_12h($ex['new_end_time']) : '' ?></td>
+      <td><?= e($ex['new_date'] ?? '-') ?> <?= e($ex['new_room_name'] ?? '') ?> <?= $ex['new_start_time'] ? time_12h($ex['new_start_time']) . '–' . time_12h($ex['new_end_time']) : '' ?></td>
       <td><?= e($ex['exception_reason'] ?? '') ?></td>
       <td><?= e($ex['created_by_name']) ?></td>
     </tr>

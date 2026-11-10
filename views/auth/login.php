@@ -5,7 +5,7 @@
     <h1><?= $isAdmin ? 'Admin log in' : 'Welcome Back!' ?></h1>
     <p class="muted">
       <?= $isAdmin
-        ? 'For administrators only — manage maps, rooms, schedules and users.'
+        ? 'For administrators only - manage maps, rooms, schedules and users.'
         : 'Log in to check room schedules and see what\'s free right now.' ?>
       <?php if ($isAdmin): ?>
         <br><span class="muted">Demo: <code>admin</code> / <code>password123</code></span>

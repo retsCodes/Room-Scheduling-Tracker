@@ -2,7 +2,7 @@
 <?php if ($isGuest): ?>
 <div class="page-head">
   <div>
-    <h1>📍 Campus Map — <?= e($first_map['map_name'] ?? 'First Floor') ?></h1>
+    <h1>📍 Campus Map - <?= e($first_map['map_name'] ?? 'First Floor') ?></h1>
     <p class="muted">See which rooms are free right now, and what's booked today. Log in as a student to check the full schedule.</p>
   </div>
   <a class="btn btn-primary" href="<?= url('login') ?>">Student log in →</a>
@@ -35,7 +35,7 @@
         <li>
           <span class="dot <?= $rs['free'] ? 'dot-free' : 'dot-busy' ?>"></span>
           <a href="<?= url('rooms/' . (int) $rs['room']['room_id']) ?>"><?= e($rs['room']['room_name']) ?></a>
-          <span class="muted"><?= e($rs['room']['map_name']) ?> — <?= $rs['free'] ? 'Free now' : 'Busy now' ?></span>
+          <span class="muted"><?= e($rs['room']['map_name']) ?> - <?= $rs['free'] ? 'Free now' : 'Busy now' ?></span>
         </li>
       <?php endforeach; ?>
     </ul>
@@ -52,7 +52,7 @@
         <li>
           <strong><?= time_12h($occ['start_time']) ?>–<?= time_12h($occ['end_time']) ?></strong>
           <a href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>"><?= e($occ['schedule_title']) ?></a>
-          — <?= e($occ['room_name']) ?> <?= status_badge($occ['occurrence_status']) ?> <?= confirm_badge($occ['admin_confirmed'] ?? 0) ?>
+          - <?= e($occ['room_name']) ?> <?= status_badge($occ['occurrence_status']) ?> <?= confirm_badge($occ['admin_confirmed'] ?? 0) ?>
         </li>
       <?php endforeach; ?>
     </ul>
@@ -62,7 +62,7 @@
     <?php elseif ($isGuest): ?>
       <p><a class="btn btn-primary" href="<?= url('login') ?>">Log in to check schedules →</a></p>
     <?php else: ?>
-      <p class="muted">Students view schedules only — booking is for admins, teachers, class mayors and org officers.</p>
+      <p class="muted">Students view schedules only - booking is for admins, teachers, class mayors and org officers.</p>
     <?php endif; ?>
   </section>
 </div>
