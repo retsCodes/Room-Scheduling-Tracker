@@ -95,9 +95,10 @@ if ($current === '') {
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="<?= url('assets/js/app.js') ?>"></script>
+<?php $assetVer = function (string $rel): string { $p = dirname(__DIR__, 2) . '/' . $rel; return url($rel) . '?v=' . (is_file($p) ? (string) filemtime($p) : '1'); }; ?>
+<script src="<?= $assetVer('assets/js/app.js') ?>"></script>
 <?php if (!empty($extra_js)): ?>
-<script src="<?= url($extra_js) ?>"></script>
+<script src="<?= $assetVer($extra_js) ?>"></script>
 <?php endif; ?>
 </body>
 </html>

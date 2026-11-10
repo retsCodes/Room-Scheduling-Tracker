@@ -226,6 +226,14 @@
       setUnsaved(false);
       statusEl.textContent = 'All changes saved.';
       propsForm.style.display = 'none'; propsEmpty.style.display = '';
+      document.getElementById('prop-name').value = '';
+      document.getElementById('prop-desc').value = '';
+      document.getElementById('prop-status').value = 'active';
+      document.getElementById('prop-shape').value = 'rectangle';
+      document.getElementById('prop-x').value = '';
+      document.getElementById('prop-y').value = '';
+      document.getElementById('prop-w').value = '';
+      document.getElementById('prop-h').value = '';
       renderAll();
     });
   });
