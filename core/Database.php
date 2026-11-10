@@ -6,11 +6,7 @@ namespace App\Core;
 use PDO;
 use PDOException;
 
-/**
- * PDO wrapper (singleton). MySQL is the production driver — the schema in
- * database/rst_db.sql is MySQL. SQLite is supported for a quick local demo
- * (DB_DRIVER=sqlite) using database/sqlite_schema.sql.
- */
+
 final class Database
 {
     private static ?self $instance = null;
@@ -64,7 +60,7 @@ final class Database
         return self::$instance;
     }
 
-    /** For tests: point the singleton at a different config. */
+    
     public static function reset(): void
     {
         self::$instance = null;
@@ -80,7 +76,7 @@ final class Database
         return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     }
 
-    /** Run a query and return all rows. */
+    
     public function all(string $sql, array $params = []): array
     {
         $stmt = $this->pdo->prepare($sql);
@@ -88,14 +84,14 @@ final class Database
         return $stmt->fetchAll();
     }
 
-    /** Run a query and return the first row, or null. */
+    
     public function one(string $sql, array $params = []): ?array
     {
         $rows = $this->all($sql, $params);
         return $rows[0] ?? null;
     }
 
-    /** Run an INSERT/UPDATE/DELETE and return affected rows. */
+    
     public function run(string $sql, array $params = []): int
     {
         $stmt = $this->pdo->prepare($sql);

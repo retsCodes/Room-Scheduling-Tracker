@@ -23,7 +23,7 @@
   <p class="muted">No schedules match.<?php if (\App\Core\Auth::canBook()): ?> <a href="<?= url('schedules/create') ?>">Create the first one</a>.<?php endif; ?></p>
 <?php else: ?>
 <table class="table card">
-  <thead><tr><th>Title</th><th>Room</th><th>Recurrence</th><th>Dates</th><th>Time</th><th>Organizer</th><th>Status</th></tr></thead>
+  <thead><tr><th>Title</th><th>Room</th><th>Recurrence</th><th>Dates</th><th>Time</th><th>Organizer</th><th>Status</th><th>Confirmed</th></tr></thead>
   <tbody>
   <?php foreach ($schedules as $s): ?>
     <tr>
@@ -34,6 +34,7 @@
       <td><?= time_12h($s['start_time']) ?>–<?= time_12h($s['end_time']) ?></td>
       <td><?= e($s['organizer_name']) ?></td>
       <td><?= status_badge($s['schedule_status']) ?></td>
+      <td><?= confirm_badge($s['admin_confirmed'] ?? 0) ?></td>
     </tr>
   <?php endforeach; ?>
   </tbody>

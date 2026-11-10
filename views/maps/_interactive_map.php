@@ -1,12 +1,5 @@
 <?php
-/**
- * Shared interactive floor map (home page + Campus Map page).
- * Expects: $map (current map), $maps (all active maps, for floor tabs),
- * $rooms (rooms of $map), $busy (room_id => current occurrence),
- * $today (today's occurrences), $today_date.
- * Rooms are coloured live: green available, red occupied now,
- * amber reserved later today, grey unavailable. Click a room for details.
- */
+
 use App\Models\Room;
 
 $todayByRoom = [];
@@ -93,8 +86,8 @@ $canBook = \App\Core\Auth::canBook();
   </aside>
 </div>
 <?php
-// JSON inside <script> must NOT go through e(): script content is raw text,
-// so &quot; would break JSON.parse. HEX flags make it safe to embed raw.
+
+
 $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
 ?>
 <script type="application/json" id="room-bookings"><?= json_encode($todayByRoom, $jsonFlags) ?></script>

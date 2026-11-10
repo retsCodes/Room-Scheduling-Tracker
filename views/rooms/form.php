@@ -43,7 +43,7 @@
   <a class="btn" href="<?= url('rooms') ?>">Cancel</a>
 </form>
 <?php if ($room && \App\Core\Auth::isAdmin()): ?>
-<form method="post" action="<?= url('rooms/' . (int) $room['room_id'] . '/delete') ?>" class="card form danger-zone" onsubmit="return confirm('Delete this room? Schedules using it must be cancelled first.')">
+<form method="post" action="<?= url('rooms/' . (int) $room['room_id'] . '/delete') ?>" class="card form danger-zone" data-confirm="Delete this room? Schedules using it must be cancelled first.">
   <?= csrf_field() ?>
   <button class="btn btn-danger" type="submit">Delete room</button>
 </form>

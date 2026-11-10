@@ -28,7 +28,7 @@
   <a class="btn" href="<?= url('maps') ?>">Cancel</a>
 </form>
 <?php if ($map && \App\Core\Auth::isAdmin()): ?>
-<form method="post" action="<?= url('maps/' . (int) $map['map_id'] . '/delete') ?>" class="card form danger-zone" onsubmit="return confirm('Delete this map and all its rooms? This cannot be undone.')">
+<form method="post" action="<?= url('maps/' . (int) $map['map_id'] . '/delete') ?>" class="card form danger-zone" data-confirm="Delete this map and all its rooms? This cannot be undone.">
   <?= csrf_field() ?>
   <button class="btn btn-danger" type="submit">Delete map</button>
 </form>

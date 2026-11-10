@@ -11,13 +11,7 @@ use App\Models\Schedule;
 use App\Models\ScheduleOccurrence;
 use App\Services\AvailabilityService;
 
-/**
- * Home page — public. The first thing anyone sees is the FIRST FLOOR
- * layout (the lowest active floor map) with live room status, not a
- * login wall. Logged-in users get the same map plus their dashboard
- * (stats, today's bookings, upcoming). Students only view; booking
- * controls are gated by Auth::canBook() in the views.
- */
+
 final class DashboardController
 {
     public function __construct(
@@ -35,7 +29,7 @@ final class DashboardController
         $now = date('H:i:s');
         $weekEnd = date('Y-m-d', strtotime('+6 days'));
 
-        // First floor = lowest floor_number among active maps.
+        
         $activeMaps = $this->maps->all(true);
         $firstMap = $activeMaps[0] ?? null;
         $firstRooms = $firstMap ? $this->rooms->all((int) $firstMap['map_id']) : [];

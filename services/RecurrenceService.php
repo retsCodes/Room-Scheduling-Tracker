@@ -6,18 +6,7 @@ namespace App\Services;
 use App\Models\ScheduleException;
 use App\Models\ScheduleOccurrence;
 
-/**
- * Expands a schedule definition into concrete occurrence dates and writes
- * them to tblScheduleOccurrences, honouring tblScheduleExceptions.
- *
- * Recurrence rules (from RST_DB.xlsx):
- * - one_time: just start_date.
- * - daily: every day from start_date to end_date.
- * - weekly: only the weekdays in tblScheduleDays (1=Mon..7=Sun).
- * - monthly: same day-of-month as start_date.
- * An open-ended series (end_date NULL) is capped at 90 days so the table
- * stays bounded; re-running generation extends it.
- */
+
 final class RecurrenceService
 {
     public const GENERATION_DAYS = 90;
@@ -27,10 +16,7 @@ final class RecurrenceService
         private ScheduleException $exceptions
     ) {}
 
-    /**
-     * @param array $schedule Row from tblSchedules (with 'days' => int[]).
-     * @return string[] List of occurrence dates (Y-m-d) that were generated.
-     */
+    
     public function generate(array $schedule, bool $clearExisting = true): array
     {
         $id = (int) $schedule['schedule_id'];
@@ -38,7 +24,7 @@ final class RecurrenceService
         $end = !empty($schedule['end_date'])
             ? new \DateTimeImmutable((string) $schedule['end_date'])
             : $start->modify('+' . (self::GENERATION_DAYS - 1) . ' days');
-        // Never generate more than a year in one pass.
+        
         $cap = $start->modify('+364 days');
         if ($end > $cap) {
             $end = $cap;
@@ -65,7 +51,7 @@ final class RecurrenceService
         return $generated;
     }
 
-    /** @return string[] */
+    
     public function datesFor(array $schedule, \DateTimeImmutable $start, \DateTimeImmutable $end): array
     {
         $type = $schedule['recurrence_type'] ?? 'one_time';
@@ -91,7 +77,7 @@ final class RecurrenceService
                 ? $cursor->modify('+1 month')
                 : $cursor->modify('+1 day');
             if (count($dates) > 400) {
-                break; // safety valve
+                break; 
             }
         }
         return $dates;
@@ -110,7 +96,7 @@ final class RecurrenceService
             );
             return;
         }
-        // moved / modified: keep the original as cancelled, add the replacement.
+        
         $this->occurrences->insert(
             $id, $original, (int) $schedule['room_id'],
             (string) $schedule['start_time'], (string) $schedule['end_time'], 'cancelled'

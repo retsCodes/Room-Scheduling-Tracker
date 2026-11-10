@@ -1,7 +1,4 @@
-// Room Scheduling Tracker — small progressive enhancements only.
-// The app works fully without JavaScript.
 document.addEventListener('DOMContentLoaded', () => {
-  // Show/hide the weekday picker based on the recurrence type.
   const recurrence = document.getElementById('recurrence_type');
   const weekdays = document.getElementById('weekdays');
   if (recurrence && weekdays) {
@@ -12,12 +9,33 @@ document.addEventListener('DOMContentLoaded', () => {
     toggle();
   }
 
-  // Confirm before any delete form submits (in addition to inline onsubmit).
-  document.querySelectorAll('form[action*="/delete"]').forEach((form) => {
-    if (!form.getAttribute('onsubmit')) {
-      form.addEventListener('submit', (e) => {
-        if (!window.confirm('Delete this? This cannot be undone.')) e.preventDefault();
+  const modalEl = document.getElementById('confirmModal');
+  const modalText = document.getElementById('confirmModalText');
+  const modalYes = document.getElementById('confirmModalYes');
+  let pendingYes = null;
+  window.showConfirm = (message, onYes) => {
+    if (!modalEl || !window.bootstrap) { if (onYes) onYes(); return; }
+    modalText.textContent = message;
+    pendingYes = onYes || null;
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  };
+  if (modalYes) {
+    modalYes.addEventListener('click', () => {
+      bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      const fn = pendingYes;
+      pendingYes = null;
+      if (fn) fn();
+    });
+  }
+
+  document.querySelectorAll('form[data-confirm]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      if (form.dataset.confirmed === '1') return;
+      e.preventDefault();
+      window.showConfirm(form.dataset.confirm, () => {
+        form.dataset.confirmed = '1';
+        form.requestSubmit();
       });
-    }
+    });
   });
 });

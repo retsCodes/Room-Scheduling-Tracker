@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** tblSchedules + tblScheduleDays */
+
 final class Schedule
 {
     public const RECURRENCE_TYPES = ['one_time', 'daily', 'weekly', 'monthly'];
@@ -30,7 +30,7 @@ final class Schedule
         return $row;
     }
 
-    /** @return array<int, array> */
+    
     public function all(array $filters = []): array
     {
         $sql = 'SELECT s.*, r.room_name, m.map_name, u.username AS organizer_name
@@ -67,7 +67,7 @@ final class Schedule
         return $rows;
     }
 
-    /** Weekdays for a weekly schedule: array of ints 1=Mon..7=Sun. */
+    
     public function days(int $scheduleId): array
     {
         $rows = $this->db->all(
@@ -128,9 +128,17 @@ final class Schedule
         );
     }
 
+    public function setConfirmed(int $id, bool $confirmed): void
+    {
+        $this->db->run(
+            'UPDATE tblSchedules SET admin_confirmed = ? WHERE schedule_id = ?',
+            [$confirmed ? 1 : 0, $id]
+        );
+    }
+
     public function delete(int $id): void
     {
-        // Days, exceptions and occurrences cascade via FK.
+        
         $this->db->run('DELETE FROM tblSchedules WHERE schedule_id = ?', [$id]);
     }
 }

@@ -16,13 +16,7 @@ final class RoomController
         private ScheduleOccurrence $occurrences
     ) {}
 
-    /**
-     * Visual room list (user-facing, card UI — not tables): week strip,
-     * filter bar (time / room / floor / status / teacher-or-mayor),
-     * rooms grouped by floor, each card showing live status, the booking
-     * time and who booked it. "Recent Filters" re-applies the last set
-     * of filters used (kept in the session).
-     */
+    
     public function index(): void
     {
         Auth::requireLogin();
@@ -42,7 +36,7 @@ final class RoomController
             'map_id' => $mapId ?? '', 'status' => $statusFilter, 'organizer' => $organizer,
         ];
 
-        // Week strip: Sunday..Saturday containing $date.
+        
         $weekStart = date('Y-m-d', strtotime($date . ' -' . date('w', strtotime($date)) . ' days'));
         $week = [];
         for ($i = 0; $i < 7; $i++) {
@@ -52,7 +46,7 @@ final class RoomController
         $prevWeek = date('Y-m-d', strtotime($weekStart . ' -7 days'));
         $nextWeek = date('Y-m-d', strtotime($weekStart . ' +7 days'));
 
-        // Today's bookings, grouped by room.
+        
         $byRoom = [];
         foreach ($this->occurrences->forDateRange($date, $date) as $occ) {
             $byRoom[(int) $occ['room_id']][] = $occ;
@@ -88,6 +82,7 @@ final class RoomController
                     'time' => time_12h($booking['start_time']) . ' – ' . time_12h($booking['end_time']),
                     'organizer' => $booking['organizer_name'],
                     'title' => $booking['schedule_title'],
+                    'confirmed' => (int) ($booking['admin_confirmed'] ?? 0) === 1,
                 ] : null,
             ];
             $key = (int) $room['map_id'];
@@ -207,8 +202,8 @@ final class RoomController
     {
         $shapeType = in_array($_POST['shape_type'] ?? '', Room::SHAPE_TYPES, true)
             ? $_POST['shape_type'] : 'rectangle';
-        // Shape is entered as JSON in the form; fall back to a simple
-        // rectangle built from x/y/w/h fields when JSON is not given.
+        
+        
         $shapeJson = trim((string) ($_POST['shape_data'] ?? ''));
         if ($shapeJson === '') {
             $shape = $shapeType === 'polygon'

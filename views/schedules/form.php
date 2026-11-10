@@ -1,5 +1,5 @@
 <h1><?= $schedule ? 'Edit schedule' : 'New schedule' ?></h1>
-<p class="muted">Conflicts are checked before saving — a room cannot be double-booked.</p>
+<p class="muted">Overlapping bookings are allowed — an admin confirms which one goes ahead.</p>
 <form method="post" action="<?= $schedule ? url('schedules/' . (int) $schedule['schedule_id']) : url('schedules') ?>" class="card form">
   <?= csrf_field() ?>
   <label>Title
@@ -11,7 +11,7 @@
   <label>Room
     <select name="room_id" required>
       <?php foreach ($rooms as $r): ?>
-        <option value="<?= (int) $r['room_id'] ?>" <?= (int) ($schedule['room_id'] ?? 0) === (int) $r['room_id'] ? 'selected' : '' ?>><?= e($r['room_name']) ?> — <?= e($r['map_name']) ?></option>
+        <option value="<?= (int) $r['room_id'] ?>" <?= (int) ($schedule['room_id'] ?? $prefill['room_id'] ?? 0) === (int) $r['room_id'] ? 'selected' : '' ?>><?= e($r['room_name']) ?> — <?= e($r['map_name']) ?></option>
       <?php endforeach; ?>
     </select>
   </label>
@@ -25,14 +25,17 @@
   <fieldset id="weekdays" class="weekdays">
     <legend>Weekdays (weekly only)</legend>
     <?php for ($d = 1; $d <= 7; $d++): ?>
-      <label class="check"><input type="checkbox" name="days[]" value="<?= $d ?>" <?= in_array($d, $schedule['days'] ?? [], true) ? 'checked' : '' ?>> <?= day_name($d) ?></label>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" name="days[]" id="day-<?= $d ?>" value="<?= $d ?>" <?= in_array($d, $schedule['days'] ?? [], true) ? 'checked' : '' ?>>
+        <label class="form-check-label" for="day-<?= $d ?>"><?= day_name($d) ?></label>
+      </div>
     <?php endfor; ?>
   </fieldset>
   <div class="grid-2">
-    <label>Start date <input type="date" name="start_date" required value="<?= e($schedule['start_date'] ?? date('Y-m-d')) ?>"></label>
+    <label>Start date <input type="date" name="start_date" required value="<?= e($schedule['start_date'] ?? $prefill['start_date'] ?? date('Y-m-d')) ?>"></label>
     <label>End date <input type="date" name="end_date" value="<?= e($schedule['end_date'] ?? '') ?>"> <span class="muted">Required for recurring schedules; leave blank for one-time.</span></label>
-    <label>Start time <input type="time" name="start_time" required value="<?= e(substr($schedule['start_time'] ?? '09:00:00', 0, 5)) ?>"></label>
-    <label>End time <input type="time" name="end_time" required value="<?= e(substr($schedule['end_time'] ?? '10:30:00', 0, 5)) ?>"></label>
+    <label>Start time <input type="time" name="start_time" required value="<?= e(substr($schedule['start_time'] ?? ($prefill['start_time'] ?? '09:00') . ':00', 0, 5)) ?>"></label>
+    <label>End time <input type="time" name="end_time" required value="<?= e(substr($schedule['end_time'] ?? ($prefill['end_time'] ?? '10:00') . ':00', 0, 5)) ?>"></label>
   </div>
   <?php if ($schedule): ?>
   <label>Status

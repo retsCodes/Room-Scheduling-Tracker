@@ -1,28 +1,14 @@
 <?php
 declare(strict_types=1);
 
-/** Shared view / request helpers. Loaded by index.php at the project root. */
+
 
 function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
 
-/**
- * The URL path of the folder this project lives in, detected at runtime
- * so the app works no matter what the folder is called.
- *
- * Examples:
- *   http://localhost/index.php            -> ''        (project at web root)
- *   http://localhost/Room-Scheduling-Tracker/index.php
- *                                          -> '/Room-Scheduling-Tracker'
- *   http://localhost/my-school-app/index.php
- *                                          -> '/my-school-app'
- *
- * Rename the XAMPP folder freely — no code or config change is needed.
- * An APP_URL with a path (e.g. APP_URL=http://localhost/MyFolder)
- * overrides the detection.
- */
+
 function base_path(): string
 {
     static $base = null;
@@ -46,12 +32,7 @@ function base_path(): string
     return $base;
 }
 
-/**
- * Build a URL inside the app, prefixed with the detected base path.
- * Use this for EVERY link, form action, redirect and asset — never write
- * a leading '/' by hand, or it will break when the project lives in a
- * subfolder (the usual XAMPP setup).
- */
+
 function url(string $path = ''): string
 {
     $path = ltrim($path, '/');
@@ -74,7 +55,7 @@ function flash(string $type, string $message): void
     $_SESSION['_flash'][] = ['type' => $type, 'message' => $message];
 }
 
-/** @return array<int, array{type: string, message: string}> */
+
 function flashes(): array
 {
     $out = $_SESSION['_flash'] ?? [];
@@ -106,7 +87,7 @@ function is_post(): bool
     return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 }
 
-/** Day number (1=Mon..7=Sun) to short name, per the spreadsheet. */
+
 function day_name(int $day): string
 {
     return [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'][$day] ?? '';
@@ -118,7 +99,7 @@ function time_12h(string $time): string
     return $ts === false ? $time : date('g:i A', $ts);
 }
 
-/** 1 -> 1st, 2 -> 2nd, 3 -> 3rd, 4 -> 4th … */
+
 function ordinal(int $n): string
 {
     $suffix = 'th';
@@ -126,6 +107,13 @@ function ordinal(int $n): string
         $suffix = [1 => 'st', 2 => 'nd', 3 => 'rd'][$n % 10] ?? 'th';
     }
     return $n . $suffix;
+}
+
+function confirm_badge($confirmed): string
+{
+    return ((int) $confirmed === 1)
+        ? '<span class="badge badge-green">✓ Admin confirmed</span>'
+        : '<span class="badge badge-amber">Awaiting confirmation</span>';
 }
 
 function status_badge(string $status): string

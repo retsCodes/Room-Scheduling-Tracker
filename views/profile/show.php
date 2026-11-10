@@ -16,7 +16,7 @@
       <input type="file" id="avatar-file" name="profile_img" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" onchange="this.form.submit()">
     </form>
     <p class="muted">JPG, PNG, GIF or WebP, under 2 MB.</p>
-    <form method="post" action="<?= url('profile/delete') ?>" onsubmit="return confirm('Delete your account? This cannot be undone.')">
+    <form method="post" action="<?= url('profile/delete') ?>" data-confirm="Delete your account? This cannot be undone.">
       <?= csrf_field() ?><button class="btn btn-danger" type="submit">Delete Account</button>
     </form>
   </section>

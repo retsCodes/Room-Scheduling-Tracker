@@ -1,22 +1,17 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Room Scheduling Tracker — front controller (web PHP, OOP, no app/ folder).
- * Run: php -S localhost:8000
- * Or drop the project folder into htdocs and open
- * http://localhost/Room-Scheduling-Tracker
- */
+
 
 session_start();
 
 require __DIR__ . '/core/helpers.php';
 
-// Class map for the App\ namespaces — no app/ folder, no composer needed:
-//   App\Core\...       -> core/...
-//   App\Models\...     -> models/...
-//   App\Services\...   -> services/...
-//   App\Controllers\...-> controllers/...
+
+
+
+
+
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
     if (!str_starts_with($class, $prefix)) {
@@ -61,7 +56,7 @@ use App\Services\RecurrenceService;
 
 $config = require __DIR__ . '/config/config.php';
 
-/** Render a view inside the main layout. */
+
 function view(string $name, array $data = []): void
 {
     extract($data);
@@ -77,7 +72,7 @@ function view(string $name, array $data = []): void
     require __DIR__ . '/views/layouts/main.php';
 }
 
-// --- Wiring (plain constructor injection; no framework needed) --------------
+
 $db          = Database::getInstance($config);
 $users       = new User($db);
 $maps        = new Map($db);
@@ -98,12 +93,12 @@ $availCtl    = new AvailabilityController($availability, $rooms, $maps);
 $userCtl     = new UserController($users);
 $profileCtl  = new ProfileController($users);
 
-// --- Routing -----------------------------------------------------------------
-// $path is the URL path inside the app (e.g. "schedules/25/edit").
-// The project folder name is stripped first, so routing works whether the
-// app lives at the web root or in any subfolder (XAMPP: htdocs/<any-name>/).
-// POST forms use a hidden _method-free convention: the same URL handles the
-// POST (update/store/delete) when the request method is POST.
+
+
+
+
+
+
 $uri  = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?? '/';
 $base = base_path();
 if ($base !== '' && str_starts_with($uri, $base)) {
@@ -111,15 +106,15 @@ if ($base !== '' && str_starts_with($uri, $base)) {
     $uri = $uri === '' ? '/' : $uri;
 }
 $path = trim($uri, '/');
-// Strip a leading "index.php" when the server exposes it in the URL
-// (e.g. /Room-Scheduling-Tracker/index.php/schedules).
+
+
 $path = preg_replace('#^index\.php/?#', '', $path) ?? $path;
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $isPost = $method === 'POST';
 
-/** @param array<int, string> $segments */
+
 $match = function (array $segments, string $pattern): ?array {
-    // Pattern like "schedules/{id}/edit" — returns ['id' => '25'] or null.
+    
     $parts = explode('/', trim($pattern, '/'));
     if (count($parts) !== count($segments)) {
         return null;
@@ -141,9 +136,9 @@ try {
     if ($path === '') {
         $dashboard->index();
     } elseif ($path === 'login' && !$isPost) {
-        // The public login page is the STUDENT login only. The admin login
-        // lives at /login/admin and is deliberately not linked from any
-        // student-facing page — admins reach it by direct URL.
+        
+        
+        
         $auth->showLogin('student');
     } elseif ($path === 'login/admin' && !$isPost) {
         $auth->showLogin('admin');
@@ -223,6 +218,8 @@ try {
         $scheduleCtl->destroy((int) $p['id']);
     } elseif (($p = $match($segments, 'schedules/{id}/cancel')) && $isPost) {
         $scheduleCtl->cancel((int) $p['id']);
+    } elseif (($p = $match($segments, 'schedules/{id}/confirm')) && $isPost) {
+        $scheduleCtl->confirm((int) $p['id']);
     } elseif (($p = $match($segments, 'schedules/{id}/exceptions')) && $isPost) {
         $scheduleCtl->storeException((int) $p['id']);
     } elseif ($path === 'occurrences' && !$isPost) {

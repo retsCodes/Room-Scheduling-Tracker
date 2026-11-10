@@ -4,7 +4,7 @@
   <div>
     <a class="btn" href="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/edit') ?>">Edit</a>
     <?php if ($schedule['schedule_status'] === 'active'): ?>
-    <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/cancel') ?>" class="inline-form" onsubmit="return confirm('Cancel this schedule and its future occurrences?')"><?= csrf_field() ?><button class="btn btn-danger" type="submit">Cancel schedule</button></form>
+    <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/cancel') ?>" class="inline-form" data-confirm="Cancel this schedule and its future occurrences?"><?= csrf_field() ?><button class="btn btn-danger" type="submit">Cancel schedule</button></form>
     <?php endif; ?>
   </div>
   <?php endif; ?>
@@ -16,6 +16,11 @@
   <p><strong>Dates:</strong> <?= e($schedule['start_date']) ?><?= $schedule['end_date'] ? ' → ' . e($schedule['end_date']) : '' ?></p>
   <p><strong>Time:</strong> <?= time_12h($schedule['start_time']) ?>–<?= time_12h($schedule['end_time']) ?></p>
   <p><strong>Status:</strong> <?= status_badge($schedule['schedule_status']) ?></p>
+  <p><strong>Admin confirmation:</strong> <?= confirm_badge($schedule['admin_confirmed'] ?? 0) ?>
+    <?php if (\App\Core\Auth::isAdmin() && $schedule['schedule_status'] === 'active'): ?>
+    <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/confirm') ?>" class="inline-form"><?= csrf_field() ?><input type="hidden" name="confirmed" value="<?= (int) ($schedule['admin_confirmed'] ?? 0) === 1 ? '0' : '1' ?>"><button class="btn btn-small" type="submit"><?= (int) ($schedule['admin_confirmed'] ?? 0) === 1 ? 'Remove confirmation' : '✓ Confirm this schedule' ?></button></form>
+    <?php endif; ?>
+  </p>
   <?php if (!empty($schedule['schedule_description'])): ?><p><?= e($schedule['schedule_description']) ?></p><?php endif; ?>
 </div>
 
@@ -92,7 +97,7 @@
 <?php endif; ?>
 
 <?php if (\App\Core\Auth::canBook()): ?>
-<form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/delete') ?>" class="card form danger-zone" onsubmit="return confirm('Delete this schedule and all its occurrences?')">
+<form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/delete') ?>" class="card form danger-zone" data-confirm="Delete this schedule and all its occurrences?">
   <?= csrf_field() ?><button class="btn btn-danger" type="submit">Delete schedule</button>
 </form>
 <?php endif; ?>

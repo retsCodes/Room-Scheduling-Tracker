@@ -17,6 +17,6 @@
   <button class="btn btn-primary" type="submit">Save changes</button>
   <a class="btn" href="<?= url('users') ?>">Cancel</a>
 </form>
-<form method="post" action="<?= url('users/' . (int) $user['user_id'] . '/delete') ?>" class="card form danger-zone" onsubmit="return confirm('Delete this user?')">
+<form method="post" action="<?= url('users/' . (int) $user['user_id'] . '/delete') ?>" class="card form danger-zone" data-confirm="Delete this user?">
   <?= csrf_field() ?><button class="btn btn-danger" type="submit">Delete user</button>
 </form>

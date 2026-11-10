@@ -1,6 +1,4 @@
-/* Admin map editor: drag rooms to move, drag the corner dot to resize
-   rectangles, edit properties live. Everything updates on the map as you
-   work; Save layout posts the whole layout to the server. */
+
 (function () {
   var svg = document.getElementById('editor-svg');
   var roomsEl = document.getElementById('editor-rooms');
@@ -11,6 +9,7 @@
   var meta = {};
   try { rooms = JSON.parse(roomsEl.textContent || '[]'); } catch (e) {}
   try { meta = JSON.parse(metaEl.textContent || '{}'); } catch (e) {}
+  var originalRooms = JSON.parse(JSON.stringify(rooms));
   var deleted = [];
   var selectedId = null;
   var tempId = -1;
@@ -82,6 +81,8 @@
         shape.setAttribute('width', +d.width || 100); shape.setAttribute('height', +d.height || 80);
       } else if (r.shape_type === 'polygon') {
         shape.setAttribute('points', (d.points || []).map(function (p) { return (+p.x || 0) + ',' + (+p.y || 0); }).join(' '));
+      } else if (r.shape_type === 'path' && d.d) {
+        shape.setAttribute('d', d.d);
       }
     }
     var c = centre(r);
@@ -99,11 +100,43 @@
   function markUnsaved() {
     unsaved = true;
     unsavedDot.style.display = 'inline-block';
-    statusEl.textContent = 'Unsaved changes — hit Save layout.';
+    statusEl.textContent = 'Unsaved changes.';
+  }
+  function boundsOf(r) {
+    var d = r.shape_data || {};
+    if (r.shape_type === 'rectangle') {
+      return { x: +d.x || 0, y: +d.y || 0, w: +d.width || 100, h: +d.height || 80 };
+    }
+    var pts = d.points || [];
+    if (pts.length) {
+      var xs = pts.map(function (p) { return +p.x || 0; });
+      var ys = pts.map(function (p) { return +p.y || 0; });
+      var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+      var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+      return { x: minX, y: minY, w: Math.max(40, maxX - minX), h: Math.max(40, maxY - minY) };
+    }
+    var c = centre(r);
+    return { x: c[0] - 80, y: c[1] - 50, w: 160, h: 100 };
+  }
+  function changeShape(r, type) {
+    var b = boundsOf(r);
+    if (type === 'rectangle') {
+      r.shape_data = { x: Math.round(b.x), y: Math.round(b.y), width: Math.max(40, Math.round(b.w)), height: Math.max(40, Math.round(b.h)) };
+    } else if (type === 'polygon') {
+      r.shape_data = { points: [
+        { x: Math.round(b.x), y: Math.round(b.y) },
+        { x: Math.round(b.x + b.w), y: Math.round(b.y) },
+        { x: Math.round(b.x + b.w), y: Math.round(b.y + b.h) },
+        { x: Math.round(b.x), y: Math.round(b.y + b.h) },
+      ] };
+    } else if (type === 'path') {
+      r.shape_data = { d: 'M ' + Math.round(b.x) + ' ' + Math.round(b.y) + ' H ' + Math.round(b.x + b.w) + ' V ' + Math.round(b.y + b.h) + ' H ' + Math.round(b.x) + ' Z' };
+    }
+    r.shape_type = type;
   }
   function snap(v) { return Math.round(v / 10) * 10; }
 
-  /* --- selection + properties panel ------------------------------------ */
+  
   function select(id) {
     selectedId = id;
     svg.querySelectorAll('.editor-room').forEach(function (g) {
@@ -116,7 +149,7 @@
     document.getElementById('prop-name').value = r.room_name;
     document.getElementById('prop-desc').value = r.room_description || '';
     document.getElementById('prop-status').value = r.room_status;
-    document.getElementById('prop-shape').textContent = r.shape_type;
+    document.getElementById('prop-shape').value = r.shape_type;
     var d = r.shape_data || {};
     var isRect = r.shape_type === 'rectangle';
     document.getElementById('prop-w').disabled = !isRect;
@@ -157,21 +190,43 @@
   });
   bindProp('prop-w', function (r, v) { if (r.shape_type === 'rectangle') r.shape_data.width = Math.max(40, +v || 40); });
   bindProp('prop-h', function (r, v) { if (r.shape_type === 'rectangle') r.shape_data.height = Math.max(40, +v || 40); });
-
-  document.getElementById('delete-room').addEventListener('click', function () {
+  document.getElementById('prop-shape').addEventListener('change', function (e) {
     var r = findRoom(selectedId);
-    if (!r || !confirm('Delete room "' + r.room_name + '"?')) return;
-    if (r.room_id > 0) deleted.push(r.room_id);
-    rooms = rooms.filter(function (x) { return x.room_id !== selectedId; });
-    selectedId = null;
-    propsForm.style.display = 'none'; propsEmpty.style.display = '';
+    if (!r) return;
+    changeShape(r, e.target.value);
     renderAll();
+    select(r.room_id);
     markUnsaved();
   });
 
-  // (The + tool in the toolbar adds rooms by clicking the map; see addRoomAt.)
+  document.getElementById('delete-room').addEventListener('click', function () {
+    var r = findRoom(selectedId);
+    if (!r) return;
+    window.showConfirm('Delete room "' + r.room_name + '"?', function () {
+      if (r.room_id > 0) deleted.push(r.room_id);
+      rooms = rooms.filter(function (x) { return x.room_id !== selectedId; });
+      selectedId = null;
+      propsForm.style.display = 'none'; propsEmpty.style.display = '';
+      renderAll();
+      markUnsaved();
+    });
+  });
 
-  /* --- tools: select / add-room, zoom, fullscreen ------------------------ */
+  document.getElementById('discard-layout').addEventListener('click', function () {
+    if (!unsaved) return;
+    window.showConfirm('Discard all unsaved changes?', function () {
+      rooms = JSON.parse(JSON.stringify(originalRooms));
+      deleted = [];
+      selectedId = null;
+      unsaved = false;
+      unsavedDot.style.display = 'none';
+      statusEl.textContent = 'All changes saved.';
+      propsForm.style.display = 'none'; propsEmpty.style.display = '';
+      renderAll();
+    });
+  });
+
+  
   var tool = 'select';
   var toolSelectBtn = document.getElementById('tool-select');
   var toolAddBtn = document.getElementById('tool-add');
@@ -211,7 +266,7 @@
     markUnsaved();
   }
 
-  /* --- dragging ---------------------------------------------------------- */
+  
   function svgPoint(evt) {
     var pt = svg.createSVGPoint();
     pt.x = evt.clientX; pt.y = evt.clientY;
@@ -219,7 +274,7 @@
   }
   var drag = null;
   svg.addEventListener('pointerdown', function (e) {
-    // Add-room tool: click empty canvas to place a new room.
+
     if (tool === 'add' && e.target === svg) {
       addRoomAt(svgPoint(e));
       setTool('select');
@@ -264,7 +319,7 @@
       d.height = Math.max(40, (+drag.orig.height || 80) + dy);
     }
     updateRoomDom(r);
-    // Keep the properties panel in sync while dragging.
+
     if (r.shape_type === 'rectangle') {
       document.getElementById('prop-x').value = +d.x || 0;
       document.getElementById('prop-y').value = +d.y || 0;
@@ -277,7 +332,7 @@
   svg.addEventListener('pointerup', endDrag);
   svg.addEventListener('pointercancel', endDrag);
 
-  /* --- save -------------------------------------------------------------- */
+  
   document.getElementById('save-layout').addEventListener('click', function () {
     var fd = new FormData();
     fd.append('_csrf', meta.csrf || '');
@@ -290,7 +345,7 @@
         if (!data.ok) { statusEl.textContent = 'Save failed: ' + (data.error || 'unknown error'); return; }
         unsaved = false;
         unsavedDot.style.display = 'none';
-        statusEl.textContent = 'Saved ✓ (' + data.saved + ' updated, ' + data.created + ' new, ' + data.deleted + ' deleted) — reloading…';
+        statusEl.textContent = 'Saved (' + data.saved + ' updated, ' + data.created + ' new, ' + data.deleted + ' deleted).';
         setTimeout(function () { window.location.reload(); }, 700);
       })
       .catch(function (err) { statusEl.textContent = 'Save failed: ' + err.message; });

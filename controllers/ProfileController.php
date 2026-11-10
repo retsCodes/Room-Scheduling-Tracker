@@ -6,12 +6,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Models\User;
 
-/**
- * My Profile (Figma: User Profile / Admin Profile) — avatar with
- * Change Picture, editable details, password change, delete account.
- * A user can never change their own role here; only an admin can do that
- * on the User List page.
- */
+
 final class ProfileController
 {
     private const AVATAR_DIR = 'uploads/profiles';

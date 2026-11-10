@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** tblScheduleOccurrences */
+
 final class ScheduleOccurrence
 {
     public const STATUSES = ['scheduled', 'cancelled', 'completed'];
@@ -25,10 +25,10 @@ final class ScheduleOccurrence
         );
     }
 
-    /** @return array<int, array> */
+    
     public function forDateRange(string $from, string $to, ?int $roomId = null): array
     {
-        $sql = 'SELECT o.*, s.schedule_title, s.schedule_description, s.organizer_id,
+        $sql = 'SELECT o.*, s.schedule_title, s.schedule_description, s.organizer_id, s.admin_confirmed,
                        r.room_name, m.map_name, u.username AS organizer_name
                 FROM tblScheduleOccurrences o
                 JOIN tblSchedules s ON s.schedule_id = o.schedule_id
@@ -44,7 +44,7 @@ final class ScheduleOccurrence
         return $this->db->all($sql . ' ORDER BY o.occurrence_date, o.start_time, r.room_name', $params);
     }
 
-    /** @return array<int, array> */
+    
     public function forSchedule(int $scheduleId): array
     {
         return $this->db->all(
@@ -53,7 +53,7 @@ final class ScheduleOccurrence
         );
     }
 
-    /** @return array<int, array> */
+    
     public function upcoming(int $limit = 10, ?int $organizerId = null): array
     {
         $sql = 'SELECT o.*, s.schedule_title, r.room_name, m.map_name
@@ -67,7 +67,7 @@ final class ScheduleOccurrence
             $sql .= ' AND s.organizer_id = ?';
             $params[] = $organizerId;
         }
-        // LIMIT cannot be bound portably on all drivers; $limit is an int we control.
+        
         return $this->db->all($sql . ' ORDER BY o.occurrence_date, o.start_time LIMIT ' . (int) $limit, $params);
     }
 
@@ -101,10 +101,7 @@ final class ScheduleOccurrence
         );
     }
 
-    /**
-     * True when another (non-cancelled) occurrence overlaps this room/date/time.
-     * Used by AvailabilityService; $excludeScheduleId lets an edit ignore itself.
-     */
+    
     public function hasOverlap(int $roomId, string $date, string $start, string $end, ?int $excludeScheduleId = null): bool
     {
         $sql = "SELECT 1 FROM tblScheduleOccurrences

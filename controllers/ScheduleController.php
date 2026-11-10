@@ -41,7 +41,7 @@ final class ScheduleController
         ]);
     }
 
-    /** Month calendar built from materialised occurrences. */
+    
     public function calendar(): void
     {
         Auth::requireLogin();
@@ -84,8 +84,15 @@ final class ScheduleController
     public function create(): void
     {
         Auth::requireCanBook();
+        $prefill = [
+            'room_id' => isset($_GET['room_id']) ? (int) $_GET['room_id'] : 0,
+            'start_date' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['date'] ?? '')) ? $_GET['date'] : date('Y-m-d'),
+            'start_time' => preg_match('/^\d{2}:\d{2}$/', (string) ($_GET['start_time'] ?? '')) ? $_GET['start_time'] : '09:00',
+            'end_time' => preg_match('/^\d{2}:\d{2}$/', (string) ($_GET['end_time'] ?? '')) ? $_GET['end_time'] : '10:00',
+        ];
         view('schedules/form', [
             'title' => 'New schedule', 'schedule' => null, 'rooms' => $this->rooms->all(null, true),
+            'prefill' => $prefill,
         ]);
     }
 
@@ -108,11 +115,6 @@ final class ScheduleController
             new \DateTimeImmutable($data['end_date'] ?? $data['start_date'])
         );
         $conflicts = $this->availability->checkSeries($data, $dates);
-        if ($conflicts) {
-            flash('error', 'That room is already booked: ' . implode('; ', array_slice($conflicts, 0, 3))
-                . (count($conflicts) > 3 ? ' (+' . (count($conflicts) - 3) . ' more)' : ''));
-            redirect('schedules/create');
-        }
         $this->db->begin();
         try {
             $id = $this->schedules->create($data);
@@ -124,7 +126,11 @@ final class ScheduleController
             flash('error', 'Could not save the schedule: ' . $e->getMessage());
             redirect('schedules/create');
         }
-        flash('success', 'Schedule created with ' . count($dates) . ' occurrence(s).');
+        $msg = 'Schedule created with ' . count($dates) . ' occurrence(s).';
+        if ($conflicts) {
+            $msg .= ' It overlaps ' . count($conflicts) . ' existing booking(s) — an admin can confirm which one goes ahead.';
+        }
+        flash('success', $msg);
         redirect('schedules/' . $id);
     }
 
@@ -168,10 +174,6 @@ final class ScheduleController
             new \DateTimeImmutable($data['end_date'] ?? $data['start_date'])
         );
         $conflicts = $this->availability->checkSeries($data, $dates, $id);
-        if ($conflicts) {
-            flash('error', 'That room is already booked: ' . implode('; ', array_slice($conflicts, 0, 3)));
-            redirect('schedules/' . $id . '/edit');
-        }
         $this->db->begin();
         try {
             $this->schedules->update($id, $data);
@@ -183,7 +185,29 @@ final class ScheduleController
             flash('error', 'Could not update the schedule: ' . $e->getMessage());
             redirect('schedules/' . $id . '/edit');
         }
-        flash('success', 'Schedule updated and occurrences regenerated.');
+        $msg = 'Schedule updated and occurrences regenerated.';
+        if ($conflicts) {
+            $msg .= ' It now overlaps ' . count($conflicts) . ' existing booking(s) — an admin can confirm which one goes ahead.';
+        }
+        flash('success', $msg);
+        redirect('schedules/' . $id);
+    }
+
+    
+    public function confirm(int $id): void
+    {
+        Auth::requireAdmin();
+        if (!is_post() || !verify_csrf()) {
+            flash('error', 'Invalid request.');
+            redirect('schedules/' . $id);
+        }
+        if ($this->schedules->find($id) === null) {
+            flash('error', 'Schedule not found.');
+            redirect('schedules');
+        }
+        $confirmed = ($_POST['confirmed'] ?? '') === '1';
+        $this->schedules->setConfirmed($id, $confirmed);
+        flash('success', $confirmed ? 'Schedule confirmed by admin.' : 'Admin confirmation removed.');
         redirect('schedules/' . $id);
     }
 
@@ -199,7 +223,7 @@ final class ScheduleController
         redirect('schedules');
     }
 
-    /** Cancel a whole schedule (keeps its history, stops future occurrences). */
+    
     public function cancel(int $id): void
     {
         Auth::requireCanBook();
@@ -213,7 +237,7 @@ final class ScheduleController
         redirect('schedules/' . $id);
     }
 
-    // --- Exceptions: skip / move / modify one occurrence -------------------
+    
     public function storeException(int $id): void
     {
         Auth::requireCanBook();

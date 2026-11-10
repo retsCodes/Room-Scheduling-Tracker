@@ -83,7 +83,7 @@ $qs = fn(array $extra) => url('rooms?' . http_build_query(array_filter(array_mer
             <span>🕐 <?= $c['booking'] ? e($c['booking']['time']) : '—' ?></span>
             <span>👥 <?= $c['booking'] ? e($c['booking']['organizer']) : '—' ?></span>
           </div>
-          <?php if ($c['booking']): ?><p class="muted room-card-title"><?= e($c['booking']['title']) ?></p><?php endif; ?>
+          <?php if ($c['booking']): ?><p class="muted room-card-title"><?= e($c['booking']['title']) ?></p><p style="margin:.3rem 0 0"><?= $c['booking']['confirmed'] ? '<span class="badge badge-green">✓ Admin confirmed</span>' : '<span class="badge badge-amber">Awaiting confirmation</span>' ?></p><?php endif; ?>
         </a>
         <?php endforeach; ?>
       </div>

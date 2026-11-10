@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** tblUsers */
+
 final class User
 {
     public const ROLES = ['admin', 'teacher', 'student', 'officer', 'mayor', 'scheduler', 'viewer'];
@@ -39,7 +39,7 @@ final class User
         return $this->db->one('SELECT * FROM tblUsers WHERE email = ? LIMIT 1', [$email]);
     }
 
-    /** @return array<int, array> */
+    
     public function all(): array
     {
         return $this->db->all(
@@ -85,7 +85,7 @@ final class User
         );
     }
 
-    /** Profile edit: the user edits their own details (role is never editable here). */
+    
     public function updateProfile(int $id, array $data): void
     {
         $this->db->run(

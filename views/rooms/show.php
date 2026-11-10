@@ -30,7 +30,7 @@ $heroBadge = [
     <p><strong>Status:</strong> <?= status_badge($room['room_status']) ?></p>
     <?php if (!empty($room['room_description'])): ?><p><?= e($room['room_description']) ?></p><?php endif; ?>
     <div class="panel-actions">
-      <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">＋ Add Reserve</a><?php endif; ?>
+      <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create?room_id=' . (int) $room['room_id']) ?>">＋ Add Reserve</a><?php endif; ?>
       <a class="btn" href="<?= url('maps/' . (int) $room['map_id']) ?>">View floor map →</a>
     </div>
     <?php if (!\App\Core\Auth::canBook()): ?>
@@ -41,8 +41,22 @@ $heroBadge = [
   <section class="card">
     <h2>⏱️ Timeline — today, <?= e(date('l, F j', strtotime($today))) ?></h2>
     <?php
-    $tlStart = 7 * 60; $tlEnd = 19 * 60; $tlSpan = $tlEnd - $tlStart;
     $toMin = fn(string $t): int => (int) substr($t, 0, 2) * 60 + (int) substr($t, 3, 2);
+    $tlStart = 7 * 60; $tlEnd = 19 * 60;
+    foreach ($today_occ as $o) {
+        $tlStart = min($tlStart, (int) floor($toMin($o['start_time']) / 60) * 60);
+        $tlEnd = max($tlEnd, (int) ceil($toMin($o['end_time']) / 60) * 60);
+    }
+    if ($tlEnd - $tlStart < 240) $tlEnd = $tlStart + 240;
+    $tlSpan = $tlEnd - $tlStart;
+    $tickStep = $tlSpan > 720 ? 120 : 60;
+    $ticks = [];
+    for ($m = $tlStart; $m <= $tlEnd; $m += $tickStep) {
+        $ticks[] = ['left' => ($m - $tlStart) / $tlSpan * 100, 'label' => date('g A', mktime((int) ($m / 60), $m % 60))];
+    }
+    if (empty($ticks) || end($ticks)['left'] < 100) {
+        $ticks[] = ['left' => 100, 'label' => date('g A', mktime((int) ($tlEnd / 60), $tlEnd % 60))];
+    }
     $tlClass = fn(string $s): string => $s === 'cancelled' ? 'tl-red' : ($s === 'completed' ? 'tl-green' : 'tl-blue');
     ?>
     <?php if (empty($today_occ)): ?>
@@ -51,18 +65,25 @@ $heroBadge = [
       <div class="timeline">
         <?php foreach ($today_occ as $occ):
           $left = max(0, ($toMin($occ['start_time']) - $tlStart) / $tlSpan * 100);
-          $width = max(2, ($toMin($occ['end_time']) - $toMin($occ['start_time'])) / $tlSpan * 100);
+          $width = max(2, min(($toMin($occ['end_time']) - $toMin($occ['start_time'])) / $tlSpan * 100, 100 - $left));
         ?>
         <div class="timeline-row">
           <span class="tl-time"><?= time_12h($occ['start_time']) ?></span>
           <div class="timeline-track">
-            <a class="timeline-block <?= $tlClass($occ['occurrence_status']) ?>" style="left:<?= round($left, 1) ?>%;width:<?= round(min($width, 100 - $left), 1) ?>%"
+            <a class="timeline-block <?= $tlClass($occ['occurrence_status']) ?>" style="left:<?= round($left, 1) ?>%;width:<?= round($width, 1) ?>%"
                href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>" title="<?= e($occ['schedule_title']) ?> <?= time_12h($occ['start_time']) ?>–<?= time_12h($occ['end_time']) ?>"><?= e($occ['schedule_title']) ?></a>
           </div>
         </div>
         <?php endforeach; ?>
+        <div class="timeline-scale-row">
+          <span></span>
+          <div class="timeline-scale">
+            <?php foreach ($ticks as $t): ?>
+              <span class="timeline-tick" style="left:<?= round($t['left'], 2) ?>%"><?= e($t['label']) ?></span>
+            <?php endforeach; ?>
+          </div>
+        </div>
       </div>
-      <div class="timeline-scale"><span>7 AM</span><span>10 AM</span><span>1 PM</span><span>4 PM</span><span>7 PM</span></div>
       <p class="muted" style="margin-top:.6rem"><span class="badge badge-blue">Booked</span> <span class="badge badge-red">Cancelled</span> <span class="badge badge-green">Completed</span></p>
     <?php endif; ?>
   </section>
@@ -76,6 +97,7 @@ $heroBadge = [
     <span class="bk-time">🕐 <?= time_12h($occ['start_time']) ?> – <?= time_12h($occ['end_time']) ?></span>
     <a class="bk-title" href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>"><?= e($occ['schedule_title']) ?></a>
     <span>👥 <?= e($occ['organizer_name'] ?? '') ?></span>
+    <?= confirm_badge($occ['admin_confirmed'] ?? 0) ?>
     <?= status_badge($occ['occurrence_status']) ?>
   </div>
   <?php endforeach; ?>
@@ -89,6 +111,7 @@ $heroBadge = [
     <span class="bk-time"><?= e(date('D, M j', strtotime($occ['occurrence_date']))) ?> · <?= time_12h($occ['start_time']) ?> – <?= time_12h($occ['end_time']) ?></span>
     <a class="bk-title" href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>"><?= e($occ['schedule_title']) ?></a>
     <span>👥 <?= e($occ['organizer_name'] ?? '') ?></span>
+    <?= confirm_badge($occ['admin_confirmed'] ?? 0) ?>
     <?= status_badge($occ['occurrence_status']) ?>
   </div>
   <?php endforeach; ?>

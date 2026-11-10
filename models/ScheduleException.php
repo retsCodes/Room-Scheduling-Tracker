@@ -5,14 +5,14 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** tblScheduleExceptions */
+
 final class ScheduleException
 {
     public const TYPES = ['skipped', 'moved', 'modified'];
 
     public function __construct(private Database $db) {}
 
-    /** @return array<int, array> */
+    
     public function forSchedule(int $scheduleId): array
     {
         return $this->db->all(

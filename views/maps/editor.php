@@ -1,8 +1,6 @@
 <?php
 use App\Models\Room;
-/** Admin map editor — layout matches the Figma Map View screenshot:
- *  title + EXPORT/IMPORT on top, icon toolbar on the left of the canvas,
- *  legend under the map, Room Properties panel on the right with Save Changes. */
+
 $editorRooms = [];
 foreach ($rooms as $r) {
     $editorRooms[] = [
@@ -36,7 +34,7 @@ foreach ($rooms as $r) {
       <div class="editor-tools">
         <a class="tool-btn tool-back" href="<?= url('maps/' . (int) $map['map_id']) ?>" title="Back to map">←</a>
         <button class="tool-btn active" type="button" id="tool-select" title="Select / move rooms">▢</button>
-        <button class="tool-btn" type="button" id="tool-add" title="Add room — then click the map">＋</button>
+        <button class="tool-btn tool-add" type="button" id="tool-add" title="Add room — then click the map">▣</button>
         <button class="tool-btn" type="button" id="zoom-in" title="Zoom in">＋</button>
         <button class="tool-btn" type="button" id="zoom-out" title="Zoom out">－</button>
         <button class="tool-btn" type="button" id="fullscreen-btn" title="Fullscreen">⛶</button>
@@ -83,7 +81,7 @@ foreach ($rooms as $r) {
         <label>X position (px) <input type="number" id="prop-x" step="10" min="0"></label>
         <label>Y position (px) <input type="number" id="prop-y" step="10" min="0"></label>
       </div>
-      <p class="editor-hint" id="prop-shape-note" style="display:none">Polygons move by dragging, but can't be resized here — use the room form for exact points.</p>
+      <p class="editor-hint" id="prop-shape-note" style="display:none">Only rectangles can be resized here — use the room form for exact points.</p>
       <label>Status
         <select id="prop-status">
           <option value="active">● Available</option>
@@ -91,8 +89,15 @@ foreach ($rooms as $r) {
         </select>
       </label>
       <label>Description (Optional) <textarea id="prop-desc" rows="2"></textarea></label>
-      <p class="muted">Shape: <strong id="prop-shape">rectangle</strong></p>
+      <label>Shape
+        <select id="prop-shape">
+          <option value="rectangle">Rectangle</option>
+          <option value="polygon">Polygon</option>
+          <option value="path">Path</option>
+        </select>
+      </label>
       <button class="btn btn-primary" type="button" id="save-layout" style="width:100%;padding:.7rem"><span id="unsaved-dot" class="unsaved-dot" style="display:none"></span>Save Changes</button>
+      <button class="btn" type="button" id="discard-layout" style="width:100%;margin-top:.5rem">Discard changes</button>
       <p style="text-align:center;margin-top:.6rem"><button class="btn btn-small btn-danger" type="button" id="delete-room">Delete room</button></p>
     </div>
   </aside>

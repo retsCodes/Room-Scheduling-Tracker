@@ -1,4 +1,4 @@
-/* Interactive floor map: click a room for live details, quick-search rooms. */
+
 (function () {
   var bookingsEl = document.getElementById('room-bookings');
   var metaEl = document.getElementById('room-meta');
@@ -57,8 +57,6 @@
     });
   }
 
-  // Clicking a room opens its details page. Hovering/selecting still
-  // previews it in the side panel (the first room is pre-selected on load).
   shapes.forEach(function (shape) {
     shape.addEventListener('click', function () {
       window.location.href = meta.roomUrl + shape.getAttribute('data-room-id');
@@ -66,7 +64,6 @@
     shape.addEventListener('mouseenter', function () { selectRoom(shape); });
   });
 
-  // Quick search: dim rooms that don't match.
   var search = document.getElementById('room-search');
   if (search) {
     search.addEventListener('input', function () {
@@ -78,8 +75,6 @@
     });
   }
 
-  // Auto-select the first occupied room, else the first room, so the panel
-  // is never empty on load.
   var first = shapes.filter(function (s) { return s.getAttribute('data-status') === 'occupied'; })[0] || shapes[0];
   if (first) selectRoom(first);
 })();

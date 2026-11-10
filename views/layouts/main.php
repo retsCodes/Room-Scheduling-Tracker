@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($title ?? 'Room Scheduling Tracker') ?> — Room Scheduling Tracker</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>">
 </head>
 <body>
 <?php
 $loggedIn = \App\Core\Auth::check(); $isAdmin = \App\Core\Auth::isAdmin();
-// Active nav item, derived from the URL so no controller has to pass it.
+
 $current = $current ?? '';
 if ($current === '') {
     $reqPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
@@ -49,7 +50,6 @@ if ($current === '') {
     <header class="topbar">
       <p class="page-title"><?= e($title ?? 'Room Scheduling Tracker') ?></p>
       <div class="top-actions">
-        <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a><?php endif; ?>
         <span class="muted"><?= e(date('l, F j, Y')) ?></span>
       </div>
     </header>
@@ -79,6 +79,22 @@ if ($current === '') {
 </main>
 <footer class="footer">Room Scheduling Tracker — database: <code>rst_db</code></footer>
 <?php endif; ?>
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Are you sure?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body"><p id="confirmModalText" style="margin:0"></p></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmModalYes">Yes, do it</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= url('assets/js/app.js') ?>"></script>
 <?php if (!empty($extra_js)): ?>
 <script src="<?= url($extra_js) ?>"></script>

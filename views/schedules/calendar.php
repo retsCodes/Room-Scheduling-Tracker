@@ -3,7 +3,7 @@ $firstTs = strtotime($first);
 $year = (int) date('Y', $firstTs);
 $monthNum = (int) date('n', $firstTs);
 $daysInMonth = (int) date('t', $firstTs);
-$firstWeekday = (int) date('N', $firstTs); // 1=Mon
+$firstWeekday = (int) date('N', $firstTs); 
 $prev = date('Y-m', strtotime($month . '-01 -1 month'));
 $next = date('Y-m', strtotime($month . '-01 +1 month'));
 ?>

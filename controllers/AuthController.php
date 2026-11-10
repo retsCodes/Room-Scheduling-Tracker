@@ -6,25 +6,12 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Models\User;
 
-/**
- * Authentication.
- *
- * Admin and student logins are SEPARATE pages — they are not the same form:
- *   /login          — the STUDENT login (the only login linked publicly)
- *   /login/admin    — admins only (role must be admin). This page is NOT
- *                     linked from any student-facing page; admins reach it
- *                     by direct URL, shared privately.
- *   /login/student  — students (teachers and org officers log in here too)
- *   /register       — student registration (never creates an admin directly;
- *                     the first account on a fresh install becomes admin)
- */
+
 final class AuthController
 {
     public function __construct(private User $users) {}
 
-    /**
-     * @param 'admin'|'student' $scope Which login page this is.
-     */
+    
     public function showLogin(string $scope = 'student'): void
     {
         if (Auth::check()) {
@@ -37,9 +24,7 @@ final class AuthController
         ]);
     }
 
-    /**
-     * @param 'admin'|'student' $scope Which login page was submitted.
-     */
+    
     public function login(string $scope = 'student'): void
     {
         $scope = $scope === 'admin' ? 'admin' : 'student';
@@ -55,8 +40,8 @@ final class AuthController
             flash('error', 'Wrong username/email or password.');
             redirect('login/' . $scope);
         }
-        // Enforce the portal: an admin account cannot sign in through the
-        // student page, and a student account cannot use the admin page.
+        
+        
         if ($scope === 'admin' && $user['role'] !== 'admin') {
             flash('error', 'That account is not an admin account. Use the student login instead.');
             redirect('login/student');
@@ -85,8 +70,8 @@ final class AuthController
             flash('error', 'Invalid request. Please try again.');
             redirect('register');
         }
-        // Registration is for students/teachers only — nobody can
-        // self-register as an admin.
+        
+        
         $role = in_array($_POST['role'] ?? '', ['student', 'teacher'], true)
             ? $_POST['role'] : 'student';
         $data = [
@@ -106,9 +91,9 @@ final class AuthController
             }
             redirect('register');
         }
-        // The first account ever created becomes the admin, so a fresh
-        // install is never locked out. Afterwards new accounts are students
-        // unless an admin changes their role.
+        
+        
+        
         if (count($this->users->all()) === 0) {
             $data['role'] = 'admin';
         }
@@ -120,7 +105,7 @@ final class AuthController
         redirect('');
     }
 
-    /** @return string[] */
+    
     private function validateRegistration(array $data): array
     {
         $errors = [];

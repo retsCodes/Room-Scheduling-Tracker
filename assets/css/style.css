@@ -1,9 +1,4 @@
-/* ==========================================================================
-   Room Scheduling Tracker — design system
-   Based on the user's Figma board: royal-blue sidebar shell, white cards,
-   green / red / amber room status, soft shadows, animated transitions.
-   Plain CSS, no build step, works offline in XAMPP.
-   ========================================================================== */
+
 :root {
   --blue-950: #172554;
   --blue-900: #1e3a8a;
@@ -53,7 +48,6 @@ p { margin: 0 0 .75rem; }
 .muted { color: var(--muted); font-size: .92rem; }
 code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font-size: .88em; }
 
-/* --- Animations -------------------------------------------------------- */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
@@ -63,7 +57,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .card:nth-child(2) { animation-delay: .05s; }
 .card:nth-child(3) { animation-delay: .1s; }
 
-/* --- App shell: blue sidebar + content (Figma) -------------------------- */
 .app-shell { display: flex; min-height: 100vh; }
 .sidebar {
   width: var(--sidebar-w);
@@ -121,7 +114,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .content { padding: 1.5rem; max-width: 1180px; width: 100%; margin: 0 auto; }
 .footer { padding: 1rem 1.5rem 1.5rem; color: var(--muted); font-size: .85rem; text-align: center; }
 
-/* Guest (logged-out) shell: slim topbar, no sidebar */
 .guest-topbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: .8rem 1.5rem; background: linear-gradient(90deg, var(--blue-900), var(--blue-600));
@@ -131,7 +123,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .guest-topbar .brand { font-weight: 800; display: flex; align-items: center; gap: .6rem; }
 .guest-topbar .brand:hover { text-decoration: none; }
 
-/* --- Cards, stats, buttons ---------------------------------------------- */
 .card {
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
@@ -184,7 +175,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .flash-success { background: var(--green-bg); color: #14532d; border: 1px solid #86efac; }
 .flash-error { background: var(--red-bg); color: #7f1d1d; border: 1px solid #fca5a5; }
 
-/* --- Tables, lists, badges ---------------------------------------------- */
 .table { width: 100%; border-collapse: collapse; background: #fff; }
 .table th, .table td { padding: .65rem .8rem; text-align: left; border-bottom: 1px solid var(--border); font-size: .93rem; }
 .table th { background: #f8fafc; color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
@@ -205,7 +195,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .dot-reserved { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-bg); }
 .dot-unavailable { background: var(--grey); box-shadow: 0 0 0 3px var(--grey-bg); }
 
-/* --- Forms ---------------------------------------------------------------- */
 .form label { display: block; margin-bottom: .8rem; font-weight: 600; font-size: .92rem; }
 .form input, .form select, .form textarea {
   display: block; width: 100%; margin-top: .3rem; padding: .6rem .75rem;
@@ -217,7 +206,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .form-inline input, .form-inline select { width: auto; }
 .danger-zone { border-color: #fecaca; background: #fff7f7; }
 
-/* --- Auth cards (Figma: centered, soft, blue gradient button) ------------ */
 .auth-wrap {
   min-height: calc(100vh - 57px);
   display: flex; align-items: center; justify-content: center;
@@ -241,7 +229,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .auth-card form { text-align: left; margin-top: 1.2rem; }
 .auth-card .btn-primary { width: 100%; padding: .7rem; font-size: 1rem; }
 
-/* --- Interactive floor map ------------------------------------------------- */
 .floor-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .floor-tab {
   padding: .5rem 1.1rem; border-radius: 999px; border: 1.5px solid var(--border);
@@ -283,7 +270,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .search-box { width: 100%; padding: .6rem .8rem; border: 1.5px solid var(--border); border-radius: 10px; font: inherit; }
 .search-box:focus { outline: none; border-color: var(--blue-500); box-shadow: 0 0 0 3px var(--blue-100); }
 
-/* --- Room timeline (Figma Room Details) ----------------------------------- */
 .timeline { position: relative; margin-top: .5rem; }
 .timeline-row { display: grid; grid-template-columns: 90px 1fr; gap: .6rem; align-items: center; padding: .35rem 0; border-bottom: 1px dashed var(--border); }
 .timeline-row:last-child { border-bottom: none; }
@@ -301,9 +287,12 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .timeline-block.tl-amber { background: var(--amber); }
 .timeline-block.tl-green { background: var(--green); }
 .timeline-block.tl-grey { background: var(--grey); }
-.timeline-scale { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); padding: .2rem .1rem 0 90px; }
+.timeline-scale-row { display: grid; grid-template-columns: 90px 1fr; gap: .6rem; align-items: start; }
+.timeline-scale { position: relative; height: 1.1rem; margin-top: .2rem; }
+.timeline-tick { position: absolute; top: 0; transform: translateX(-50%); font-size: .75rem; color: var(--muted); white-space: nowrap; }
+.timeline-tick:first-child { transform: translateX(0); }
+.timeline-tick:last-child { transform: translateX(-100%); }
 
-/* --- Calendar (month grid) --------------------------------------------------- */
 .calendar {
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
@@ -334,7 +323,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .cal-event:hover { background: var(--blue-500); color: #fff; text-decoration: none; }
 .cal-event.cal-cancelled { background: var(--red-bg); color: var(--red-dark); text-decoration: line-through; }
 
-/* --- Map editor (admin) ----------------------------------------------------- */
 .editor-wrap { position: relative; }
 .editor-tools {
   position: absolute; left: .7rem; top: .7rem; z-index: 5;
@@ -349,6 +337,7 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .tool-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); text-decoration: none; }
 .tool-btn.active { background: var(--blue-700); color: #fff; border-color: transparent; }
 .tool-btn.tool-back { background: #111827; color: #fff; border-color: #111827; }
+.tool-btn.tool-add { background: var(--blue-100); color: var(--blue-700); border-color: var(--blue-500); }
 .editor-legend {
   display: flex; gap: 1.4rem; justify-content: center; flex-wrap: wrap;
   padding: .8rem 0 .1rem; font-size: .9rem; color: var(--muted);
@@ -367,7 +356,15 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .editor-hint { font-size: .85rem; color: var(--muted); }
 .unsaved-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--amber); margin-right: .4rem; }
 
-/* --- Visual room list (user-facing cards, not tables) ------------------------ */
+.weekdays { border: 1px solid var(--border); border-radius: 10px; padding: .7rem .9rem; margin-bottom: .8rem; display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; align-items: center; }
+.weekdays legend { font-weight: 600; font-size: .92rem; padding: 0 .4rem; }
+.weekdays .form-check { display: inline-flex; align-items: center; gap: .45rem; margin: 0; min-height: 0; padding-left: 0; }
+.weekdays .form-check-input { margin: 0; width: 1.05rem; height: 1.05rem; flex: none; }
+.weekdays .form-check-label { margin: 0; font-weight: 600; font-size: .92rem; line-height: 1; }
+
+.modal .btn { font-family: inherit; }
+.btn-secondary { background: #6b7280; border-color: #6b7280; }
+
 .page-label { font-size: .75rem; font-weight: 800; letter-spacing: .14em; color: var(--muted); margin: 0 0 .2rem; }
 .week-strip { padding: 1.2rem 1.4rem; }
 .week-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
@@ -420,7 +417,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .room-card-meta { display: flex; flex-direction: column; gap: .3rem; margin-top: .7rem; color: var(--muted); font-size: .92rem; }
 .room-card-title { margin: .6rem 0 0; font-size: .88rem; }
 
-/* --- Visual room details ----------------------------------------------------- */
 .room-hero { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .room-hero .room-big-status { margin-left: auto; font-size: 1rem; padding: .45rem 1rem; }
 .booking-card {
@@ -432,7 +428,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .booking-card .bk-time { font-weight: 800; min-width: 150px; }
 .booking-card .bk-title { flex: 1; min-width: 140px; }
 
-/* --- Profile ----------------------------------------------------------------- */
 .profile-side { text-align: center; }
 .avatar {
   width: 140px; height: 140px; margin: 0 auto 1rem; border-radius: 50%;
@@ -442,7 +437,6 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .avatar-silhouette { font-size: 5rem; line-height: 1; color: var(--blue-900); }
 
-/* --- Responsive -------------------------------------------------------------- */
 @media (max-width: 900px) {
   .app-shell { flex-direction: column; }
   .sidebar { width: 100%; flex: none; height: auto; position: static; flex-direction: row; align-items: center; padding: 0 .6rem; }

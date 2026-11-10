@@ -52,7 +52,7 @@
         <li>
           <strong><?= time_12h($occ['start_time']) ?>–<?= time_12h($occ['end_time']) ?></strong>
           <a href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>"><?= e($occ['schedule_title']) ?></a>
-          — <?= e($occ['room_name']) ?> <?= status_badge($occ['occurrence_status']) ?>
+          — <?= e($occ['room_name']) ?> <?= status_badge($occ['occurrence_status']) ?> <?= confirm_badge($occ['admin_confirmed'] ?? 0) ?>
         </li>
       <?php endforeach; ?>
     </ul>
@@ -81,7 +81,7 @@
         <td><?= time_12h($occ['start_time']) ?>–<?= time_12h($occ['end_time']) ?></td>
         <td><a href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>"><?= e($occ['schedule_title']) ?></a></td>
         <td><?= e($occ['room_name']) ?> (<?= e($occ['map_name']) ?>)</td>
-        <td><?= status_badge($occ['occurrence_status']) ?></td>
+        <td><?= status_badge($occ['occurrence_status']) ?> <?= confirm_badge($occ['admin_confirmed'] ?? 0) ?></td>
       </tr>
       <?php endforeach; ?>
     </tbody>

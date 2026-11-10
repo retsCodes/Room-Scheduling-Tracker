@@ -22,7 +22,7 @@ final class MapController
         view('maps/index', ['title' => 'Floor maps', 'maps' => $this->maps->all()]);
     }
 
-    /** Interactive floor map: rooms drawn as SVG, coloured by live status. */
+    
     public function show(int $id): void
     {
         Auth::requireLogin();
@@ -72,11 +72,7 @@ final class MapController
         redirect('maps/' . $id);
     }
 
-    /**
-     * Interactive map editor (admin): drag rooms to move them, drag the
-     * corner handle to resize rectangles, edit properties in the side
-     * panel and watch the map redesign live. Saved via saveLayout().
-     */
+    
     public function editor(int $id): void
     {
         Auth::requireAdmin();
@@ -102,12 +98,7 @@ final class MapController
         ]);
     }
 
-    /**
-     * Save a layout from the editor: POST with _csrf + `layout` (JSON):
-     * [{room_id|null, room_name, shape_type, shape_data, room_description,
-     * room_status}] and optional `deleted` (JSON array of room ids).
-     * Returns JSON (the editor posts with fetch).
-     */
+    
     public function saveLayout(int $id): void
     {
         Auth::requireAdmin();
@@ -160,12 +151,7 @@ final class MapController
         echo json_encode(['ok' => true, 'saved' => $saved, 'created' => $created, 'deleted' => is_array($deleted) ? count($deleted) : 0]);
     }
 
-    /**
-     * Import rooms from a JSON file (Figma Map View: Import). Accepts the
-     * format exportMap() produces: {"map": {...}, "rooms": [...]} or a bare
-     * rooms array. Rooms are matched by room_id, then by room_name — matched
-     * rooms are updated, the rest are created. Nothing is deleted.
-     */
+    
     public function importMap(int $id): void
     {
         Auth::requireAdmin();
@@ -227,7 +213,7 @@ final class MapController
         redirect('maps/' . $id . '/editor');
     }
 
-    /** Download the map + its rooms as JSON (Figma Map View: Export). */
+    
     public function exportMap(int $id): void
     {
         Auth::requireAdmin();

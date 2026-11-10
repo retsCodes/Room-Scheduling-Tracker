@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** tblRooms */
+
 final class Room
 {
     public const SHAPE_TYPES = ['polygon', 'rectangle', 'path'];
@@ -23,7 +23,7 @@ final class Room
         );
     }
 
-    /** @return array<int, array> */
+    
     public function all(?int $mapId = null, bool $activeOnly = false): array
     {
         $sql = 'SELECT r.*, m.map_name, m.floor_number
@@ -71,10 +71,7 @@ final class Room
         $this->db->run('DELETE FROM tblRooms WHERE room_id = ?', [$id]);
     }
 
-    /**
-     * Turn a room's shape_data JSON into an SVG element string.
-     * rectangle -> <rect>, polygon/path -> <polygon>/<path>.
-     */
+    
     public static function shapeToSvg(array $room, string $fill, string $extra = ''): string
     {
         $shape = json_decode((string) ($room['shape_data'] ?? ''), true) ?: [];
@@ -98,7 +95,7 @@ final class Room
         return sprintf('<polygon points="%s" %s />', e(trim($points)), $attrs);
     }
 
-    /** Centre point of a shape, for labelling it on the map. */
+    
     public static function shapeCentre(array $room): array
     {
         $shape = json_decode((string) ($room['shape_data'] ?? ''), true) ?: [];

@@ -23,17 +23,30 @@ final class AvailabilityController
         $start = $_GET['start_time'] ?? '09:00';
         $end = $_GET['end_time'] ?? '10:00';
         $mapId = isset($_GET['map_id']) && $_GET['map_id'] !== '' ? (int) $_GET['map_id'] : null;
-        $free = [];
         $searched = isset($_GET['date']);
+        $rooms = [];
         if ($searched && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && $end > $start) {
-            $free = $this->availability->freeRooms($date, $start . ':00', $end . ':00', $mapId);
+            $occ = $this->availability->occurrences();
+            $byRoom = [];
+            foreach ($occ->forDateRange($date, $date) as $o) {
+                if ($o['occurrence_status'] !== 'scheduled') continue;
+                if ($o['start_time'] < $end . ':00' && $o['end_time'] > $start . ':00') {
+                    $byRoom[(int) $o['room_id']][] = $o;
+                }
+            }
+            foreach ($this->rooms->all($mapId) as $r) {
+                $rooms[] = [
+                    'room' => $r,
+                    'free' => empty($byRoom[(int) $r['room_id']]),
+                    'bookings' => $byRoom[(int) $r['room_id']] ?? [],
+                ];
+            }
         }
         view('availability/index', [
             'title' => 'Check availability',
             'date' => $date, 'start' => $start, 'end' => $end, 'map_id' => $mapId,
-            'free' => $free, 'searched' => $searched,
+            'rooms' => $rooms, 'searched' => $searched,
             'maps' => $this->maps->all(true),
-            'rooms' => $this->rooms->all($mapId),
         ]);
     }
 }

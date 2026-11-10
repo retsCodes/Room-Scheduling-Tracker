@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** tblMaps */
+
 final class Map
 {
     public function __construct(private Database $db) {}
@@ -15,7 +15,7 @@ final class Map
         return $this->db->one('SELECT * FROM tblMaps WHERE map_id = ?', [$id]);
     }
 
-    /** @return array<int, array> */
+    
     public function all(bool $activeOnly = false): array
     {
         $sql = 'SELECT m.*, (SELECT COUNT(*) FROM tblRooms r WHERE r.map_id = m.map_id) AS room_count
@@ -51,7 +51,7 @@ final class Map
 
     public function delete(int $id): void
     {
-        // Rooms on this map are deleted by the FK (ON DELETE CASCADE).
+        
         $this->db->run('DELETE FROM tblMaps WHERE map_id = ?', [$id]);
     }
 }

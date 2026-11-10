@@ -2,11 +2,14 @@
 
 A fully functioning room scheduling tracker in **object-oriented PHP** (no framework, plain PDO), built from the database in `RST_DB.xlsx`.
 
-Book rooms, see who's using a room right now on a floor map, check availability, and manage recurring schedules — with conflicts blocked before anything is saved.
+Book rooms, see who's using a room right now on a floor map, check availability, and manage recurring schedules. Overlapping bookings are allowed — an admin confirms which one goes ahead.
 
 ## What it does
 
 - **Auth & roles** — register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student`, `officer` (org officer), `mayor` (class mayor, plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. **Only admins, teachers, class mayors and org officers can book rooms / make schedules (Add Reserve)** — students log in only to check schedules (read-only; booking buttons are hidden from them and the server rejects their booking requests). Admins manage maps, rooms and users.
+- **Admin confirmation** — every schedule has an admin confirmation (`admin_confirmed` on tblSchedules; run `database/migrations/001_add_admin_confirmed.sql` once on an existing database). Schedules stay active without confirmation. Overlapping bookings are never blocked: both stay active, and an admin confirms one (green light) from the schedule page — confirming one does not delete the other. Availability, the room list, room details and the dashboard all show each booking's confirmation state (✓ Admin confirmed / Awaiting confirmation), and rooms with bookings can still be booked.
+- **Confirmations** — deletes, cancels and discards ask in a Bootstrap modal ("Are you sure?") instead of the browser's own dialog.
+- **Map editor** — the Room Properties panel now has a Shape selector (rectangle / polygon / path, converted from the room's current bounds) and a Discard changes button that restores the last saved layout. The add-room tool is now ▣ (blue) so it can't be mistaken for zoom-in ＋.
 - **Rooms list (visual, not tables)** — week strip (Sun–Sat with the selected day highlighted), filter bar (time, room search, floor, status, teacher/mayor search, Recent Filters), rooms grouped by floor as cards showing live status (AVAILABLE / CONFIRMED / RESERVED / UNAVAILABLE), booking time and who booked it. Click a card to open the room.
 - **Room details (visual)** — big status badge, room info, today's timeline, today's and upcoming bookings as cards, and **＋ Add Reserve** shown only to admins, teachers, class mayors and org officers.
 - **Separate logins** — admin and student logins are different pages, not one form. `/login` IS the student login (the only login linked anywhere public). `/login/admin` only accepts admin accounts and is **not linked from any student-facing page** — admins reach it by direct URL, shared privately. `/login/student` is for students (teachers and org officers log in there too). An admin account is rejected on the student page and vice versa.
@@ -18,7 +21,7 @@ Book rooms, see who's using a room right now on a floor map, check availability,
 - **Calendar** — month grid with today highlighted and bookings as coloured pills (click one to open the schedule).
 - **Floor maps** — CRUD for maps (`tblMaps`: name, floor, width/height, background image, status). Each map renders as an interactive SVG: rooms are drawn from their `shape_data` JSON (rectangle / polygon / path) and coloured green/red by whether they are free or busy right now.
 - **Rooms** — CRUD for rooms (`tblRooms`), with shape JSON, description and `active` / `unavailable` status.
-- **Schedules** — CRUD with recurrence: `one_time`, `daily`, `weekly` (pick weekdays, 1=Mon…7=Sun via `tblScheduleDays`), `monthly`. Saving a schedule materialises its occurrences in `tblScheduleOccurrences`.
+- **Schedules** — CRUD with recurrence: `one_time`, `daily`, `weekly` (pick weekdays, 1=Mon…7=Sun via `tblScheduleDays`), `monthly`. Saving a schedule materialises its occurrences in `tblScheduleOccurrences`. Overlapping bookings are allowed and flagged instead of blocked (back-to-back still never counts as a conflict).
 - **Conflict detection** — before a schedule is saved, every date in the series is checked against existing occurrences. Overlapping bookings are rejected; back-to-back bookings (one ends at 10:00, the next starts at 10:00) are allowed.
 - **Exceptions** — skip, move or modify a single occurrence of a recurring series (`tblScheduleExceptions`), e.g. skip Nov 9 for maintenance. Occurrences are regenerated when an exception is added.
 - **Occurrences** — list by date range, cancel / restore / complete individual occurrences.
@@ -35,7 +38,7 @@ Source: `RST_DB.xlsx` (data dictionary, one sheet). The schema in `database/rst_
 | `tblUsers` | `user_id`, `username`, `email`, `password_hash`, `profile_img`, `role`, `section`, `org_name`, `phone_number` |
 | `tblMaps` | `map_id`, `map_name`, `floor_number`, `map_width`, `map_height`, `background_image`, `map_status`, `created_at`, `updated_at` |
 | `tblRooms` | `room_id`, `map_id` (FK), `room_name`, `shape_type`, `shape_data` (JSON), `room_description`, `room_status`, `created_at`, `updated_at` |
-| `tblSchedules` | `schedule_id`, `organizer_id` (FK), `room_id` (FK), `schedule_title`, `schedule_description`, `recurrence_type`, `start_date`, `end_date`, `start_time`, `end_time`, `schedule_status`, `created_at`, `updated_at` |
+| `tblSchedules` | `schedule_id`, `organizer_id` (FK), `room_id` (FK), `schedule_title`, `schedule_description`, `recurrence_type`, `start_date`, `end_date`, `start_time`, `end_time`, `schedule_status`, `admin_confirmed`, `created_at`, `updated_at` |
 | `tblScheduleDays` | `schedule_day_id`, `schedule_id` (FK), `day_of_week` (1=Mon…7=Sun) |
 | `tblScheduleExceptions` | `exception_id`, `schedule_id` (FK), `original_date`, `exception_type`, `new_date`, `new_room_id` (FK), `new_start_time`, `new_end_time`, `exception_reason`, `created_by` (FK), `created_at` |
 | `tblScheduleOccurrences` | `occurrence_id`, `schedule_id` (FK), `occurrence_date`, `room_id` (FK), `start_time`, `end_time`, `occurrence_status` |

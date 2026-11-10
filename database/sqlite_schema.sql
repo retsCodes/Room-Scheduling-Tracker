@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS tblSchedules (
   start_time           TIME NOT NULL,
   end_time             TIME NOT NULL,
   schedule_status      VARCHAR(20) NOT NULL DEFAULT 'active',
+  admin_confirmed      INTEGER NOT NULL DEFAULT 0,
   created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CHECK (end_time > start_time)
