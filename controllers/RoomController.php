@@ -123,6 +123,7 @@ final class RoomController
             'today' => $today,
             'today_occ' => $this->occurrences->forDateRange($today, $today, $id),
             'upcoming' => $this->occurrences->forDateRange($today, date('Y-m-d', strtotime('+30 days')), $id),
+            'extra_js' => 'assets/js/timeline.js',
         ]);
     }
 

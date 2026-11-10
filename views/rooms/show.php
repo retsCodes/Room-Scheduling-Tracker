@@ -48,43 +48,48 @@ $heroBadge = [
         $tlEnd = max($tlEnd, (int) ceil($toMin($o['end_time']) / 60) * 60);
     }
     if ($tlEnd - $tlStart < 240) $tlEnd = $tlStart + 240;
-    $tlSpan = $tlEnd - $tlStart;
-    $tickStep = $tlSpan > 720 ? 120 : 60;
-    $ticks = [];
-    for ($m = $tlStart; $m <= $tlEnd; $m += $tickStep) {
-        $ticks[] = ['left' => ($m - $tlStart) / $tlSpan * 100, 'label' => date('g A', mktime((int) ($m / 60), $m % 60))];
+    $tlBookings = [];
+    foreach ($today_occ as $o) {
+        $tlBookings[] = [
+            'id' => (int) $o['schedule_id'],
+            'title' => $o['schedule_title'],
+            'start' => $toMin($o['start_time']),
+            'end' => $toMin($o['end_time']),
+            'status' => $o['occurrence_status'],
+            'confirmed' => (int) ($o['admin_confirmed'] ?? 0),
+            'url' => url('schedules/' . (int) $o['schedule_id']),
+            'time' => time_12h($o['start_time']) . ' - ' . time_12h($o['end_time']),
+        ];
     }
-    if (empty($ticks) || end($ticks)['left'] < 100) {
-        $ticks[] = ['left' => 100, 'label' => date('g A', mktime((int) ($tlEnd / 60), $tlEnd % 60))];
-    }
-    $tlClass = fn(string $s): string => $s === 'cancelled' ? 'tl-red' : ($s === 'completed' ? 'tl-green' : 'tl-blue');
+    $tlData = ['start' => $tlStart, 'end' => $tlEnd, 'now' => (int) date('H') * 60 + (int) date('i'), 'bookings' => $tlBookings];
+    $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
     ?>
     <?php if (empty($today_occ)): ?>
       <p class="muted">Nothing booked today - this room is free all day.</p>
     <?php else: ?>
-      <div class="timeline">
-        <?php foreach ($today_occ as $occ):
-          $left = max(0, ($toMin($occ['start_time']) - $tlStart) / $tlSpan * 100);
-          $width = max(2, min(($toMin($occ['end_time']) - $toMin($occ['start_time'])) / $tlSpan * 100, 100 - $left));
-        ?>
-        <div class="timeline-row">
-          <span class="tl-time"><?= time_12h($occ['start_time']) ?></span>
-          <div class="timeline-track">
-            <a class="timeline-block <?= $tlClass($occ['occurrence_status']) ?>" style="left:<?= round($left, 1) ?>%;width:<?= round($width, 1) ?>%"
-               href="<?= url('schedules/' . (int) $occ['schedule_id']) ?>" title="<?= e($occ['schedule_title']) ?> <?= time_12h($occ['start_time']) ?>–<?= time_12h($occ['end_time']) ?>"><?= e($occ['schedule_title']) ?></a>
-          </div>
+      <div class="tl-controls">
+        <div class="tl-presets">
+          <button type="button" class="btn btn-small tl-preset" data-preset="all">All day</button>
+          <button type="button" class="btn btn-small tl-preset" data-preset="morning">Morning</button>
+          <button type="button" class="btn btn-small tl-preset" data-preset="afternoon">Afternoon</button>
+          <button type="button" class="btn btn-small tl-preset" data-preset="evening">Evening</button>
         </div>
-        <?php endforeach; ?>
-        <div class="timeline-scale-row">
-          <span></span>
-          <div class="timeline-scale">
-            <?php foreach ($ticks as $t): ?>
-              <span class="timeline-tick" style="left:<?= round($t['left'], 2) ?>%"><?= e($t['label']) ?></span>
-            <?php endforeach; ?>
-          </div>
+        <div class="tl-zoom">
+          <button type="button" class="btn btn-small" id="tl-zoom-out" title="Zoom out">−</button>
+          <button type="button" class="btn btn-small" id="tl-zoom-in" title="Zoom in">+</button>
+          <button type="button" class="btn btn-small" id="tl-reset">Reset</button>
         </div>
       </div>
-      <p class="muted" style="margin-top:.6rem"><span class="badge badge-blue">Booked</span> <span class="badge badge-red">Cancelled</span> <span class="badge badge-green">Completed</span></p>
+      <p class="muted tl-range" id="tl-range"></p>
+      <div class="timeline" id="timeline">
+        <div class="tl-grid" id="tl-grid"></div>
+        <div class="tl-lanes" id="tl-lanes"></div>
+        <div class="tl-now" id="tl-now" style="display:none" title="Now"></div>
+        <div class="tl-select" id="tl-select" style="display:none"></div>
+      </div>
+      <div class="timeline-scale" id="tl-scale"></div>
+      <p class="muted" style="margin-top:.6rem"><span class="badge badge-blue">Booked</span> <span class="badge badge-red">Cancelled</span> <span class="badge badge-green">Completed</span> <span class="muted">Drag across the timeline to zoom into those hours. A gold outline means an admin confirmed it.</span></p>
+      <script type="application/json" id="timeline-data"><?= json_encode($tlData, $jsonFlags) ?></script>
     <?php endif; ?>
   </section>
 </div>
