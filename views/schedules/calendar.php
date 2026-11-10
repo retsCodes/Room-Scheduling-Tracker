@@ -15,16 +15,19 @@ $next = date('Y-m', strtotime($month . '-01 +1 month'));
     <a class="btn" href="<?= url('calendar?month=' . $next . ($room_id ? '&room_id=' . $room_id : '')) ?>">Next →</a>
   </div>
 </div>
-<form method="get" action="<?= url('calendar') ?>" class="card form-inline">
+<form method="get" action="<?= url('calendar') ?>" class="card form">
   <input type="hidden" name="month" value="<?= e($month) ?>">
-  <label>Room
-    <select name="room_id" onchange="this.form.submit()">
-      <option value="">All rooms</option>
-      <?php foreach ($rooms as $r): ?>
-        <option value="<?= (int) $r['room_id'] ?>" <?= $room_id === (int) $r['room_id'] ? 'selected' : '' ?>><?= e($r['room_name']) ?></option>
-      <?php endforeach; ?>
-    </select>
-  </label>
+  <div class="grid-2">
+    <label>Room
+      <select name="room_id">
+        <option value="">All rooms</option>
+        <?php foreach ($rooms as $r): ?>
+          <option value="<?= (int) $r['room_id'] ?>" <?= $room_id === (int) $r['room_id'] ? 'selected' : '' ?>><?= e($r['room_name']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
 </form>
 <div class="calendar">
   <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?><div class="cal-head"><?= $d ?></div><?php endforeach; ?>

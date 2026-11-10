@@ -177,6 +177,7 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .flash-error { background: var(--red-bg); color: #7f1d1d; border: 1px solid #fca5a5; }
 
 .table { display: table; width: 100%; border-collapse: collapse; background: #fff; }
+.nowrap { white-space: nowrap; }
 .table th, .table td { padding: .65rem .8rem; text-align: left; border-bottom: 1px solid var(--border); font-size: .93rem; }
 .table th { background: #f8fafc; color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
 .table tbody tr { transition: background .18s ease; }
