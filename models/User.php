@@ -8,7 +8,7 @@ use App\Core\Database;
 /** tblUsers */
 final class User
 {
-    public const ROLES = ['admin', 'teacher', 'student', 'officer', 'scheduler', 'viewer'];
+    public const ROLES = ['admin', 'teacher', 'student', 'officer', 'mayor', 'scheduler', 'viewer'];
 
     public function __construct(private Database $db) {}
 

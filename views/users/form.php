@@ -5,7 +5,7 @@
   <label>Email <input type="email" name="email" required value="<?= e($user['email']) ?>"></label>
   <label>Role
     <select name="role">
-      <?php foreach (['admin','teacher','student','officer','scheduler','viewer'] as $r): ?>
+      <?php foreach (['admin','teacher','student','officer','mayor','scheduler','viewer'] as $r): ?>
         <option <?= $user['role'] === $r ? 'selected' : '' ?>><?= $r ?></option>
       <?php endforeach; ?>
     </select>

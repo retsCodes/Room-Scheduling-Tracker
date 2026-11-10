@@ -16,7 +16,8 @@ INSERT INTO tblUsers (user_id, username, email, password_hash, role, section, or
 (1, 'admin', 'admin@example.com', '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'admin', NULL, NULL, '+63917-123-4567'),
 (2, 'jdoe',  'jdoe@example.com',  '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'teacher', NULL, NULL, '+63917-123-4568'),
 (3, 'ana',   'ana@example.com',   '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'student', 'BSIT-1A', 'Computer Science Society', '+63917-123-4569'),
-(4, 'officer', 'officer@example.com', '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'officer', 'BSIT-2A', 'Computer Science Society', '+63917-123-4570')
+(4, 'officer', 'officer@example.com', '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'officer', 'BSIT-2A', 'Computer Science Society', '+63917-123-4570'),
+(5, 'mayor',   'mayor@example.com',   '$2y$10$lVgcRx0KA..y2Hy4mPUlvupUGYu9Ptx5pHSW85DmBq7WGeCUDeVzq', 'mayor', 'BSIT-1A', NULL, '+63917-123-4571')
 ON DUPLICATE KEY UPDATE username = VALUES(username);
 
 INSERT INTO tblMaps (map_id, map_name, floor_number, map_width, map_height, background_image, map_status) VALUES

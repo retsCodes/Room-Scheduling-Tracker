@@ -62,7 +62,7 @@
     <?php elseif ($isGuest): ?>
       <p><a class="btn btn-primary" href="<?= url('login') ?>">Log in to check schedules →</a></p>
     <?php else: ?>
-      <p class="muted">Students view schedules only — booking is for admins, teachers and org officers.</p>
+      <p class="muted">Students view schedules only — booking is for admins, teachers, class mayors and org officers.</p>
     <?php endif; ?>
   </section>
 </div>

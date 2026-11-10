@@ -2,7 +2,7 @@
   <h1>Schedules</h1>
   <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a><?php endif; ?>
 </div>
-<?php if (\App\Core\Auth::isReadOnly()): ?><p class="muted">You're viewing schedules as a student — only admins, teachers and org officers can book rooms.</p><?php endif; ?>
+<?php if (\App\Core\Auth::isReadOnly()): ?><p class="muted">You're viewing schedules as a student — only admins, teachers, class mayors and org officers can book rooms.</p><?php endif; ?>
 <form method="get" action="<?= url('schedules') ?>" class="card form-inline">
   <input type="search" name="search" placeholder="Search title…" value="<?= e($filters['search'] ?? '') ?>">
   <select name="room_id">

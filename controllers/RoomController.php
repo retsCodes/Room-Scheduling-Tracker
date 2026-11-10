@@ -16,15 +16,100 @@ final class RoomController
         private ScheduleOccurrence $occurrences
     ) {}
 
+    /**
+     * Visual room list (user-facing, card UI — not tables): week strip,
+     * filter bar (time / room / floor / status / teacher-or-mayor),
+     * rooms grouped by floor, each card showing live status, the booking
+     * time and who booked it. "Recent Filters" re-applies the last set
+     * of filters used (kept in the session).
+     */
     public function index(): void
     {
         Auth::requireLogin();
+        if (isset($_GET['recent']) && $_GET['recent'] === '1' && !empty($_SESSION['room_filters'])) {
+            $f = $_SESSION['room_filters'];
+            $_GET = array_merge($_GET, $f);
+        }
+        $today = date('Y-m-d');
+        $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['date'] ?? '')) ? $_GET['date'] : $today;
+        $time = preg_match('/^\d{2}:\d{2}$/', (string) ($_GET['time'] ?? '')) ? $_GET['time'] : ($date === $today ? date('H:i') : '08:00');
+        $search = trim((string) ($_GET['search'] ?? ''));
         $mapId = isset($_GET['map_id']) && $_GET['map_id'] !== '' ? (int) $_GET['map_id'] : null;
+        $statusFilter = in_array($_GET['status'] ?? '', ['available', 'occupied', 'reserved', 'unavailable'], true) ? $_GET['status'] : '';
+        $organizer = trim((string) ($_GET['organizer'] ?? ''));
+        $_SESSION['room_filters'] = [
+            'date' => $date, 'time' => $time, 'search' => $search,
+            'map_id' => $mapId ?? '', 'status' => $statusFilter, 'organizer' => $organizer,
+        ];
+
+        // Week strip: Sunday..Saturday containing $date.
+        $weekStart = date('Y-m-d', strtotime($date . ' -' . date('w', strtotime($date)) . ' days'));
+        $week = [];
+        for ($i = 0; $i < 7; $i++) {
+            $d = date('Y-m-d', strtotime($weekStart . " +$i days"));
+            $week[] = ['date' => $d, 'day' => (int) date('j', strtotime($d)), 'name' => date('D', strtotime($d))];
+        }
+        $prevWeek = date('Y-m-d', strtotime($weekStart . ' -7 days'));
+        $nextWeek = date('Y-m-d', strtotime($weekStart . ' +7 days'));
+
+        // Today's bookings, grouped by room.
+        $byRoom = [];
+        foreach ($this->occurrences->forDateRange($date, $date) as $occ) {
+            $byRoom[(int) $occ['room_id']][] = $occ;
+        }
+        $timeSec = $time . ':00';
+        $grouped = [];
+        $total = 0;
+        foreach ($this->rooms->all($mapId) as $room) {
+            $rid = (int) $room['room_id'];
+            if ($search !== '' && stripos($room['room_name'], $search) === false) continue;
+            $occ = $byRoom[$rid] ?? [];
+            $current = null; $next = null;
+            foreach ($occ as $o) {
+                if ($o['occurrence_status'] !== 'scheduled') continue;
+                if ($o['start_time'] <= $timeSec && $o['end_time'] > $timeSec) $current = $o;
+                elseif ($o['start_time'] > $timeSec && $next === null) $next = $o;
+            }
+            if (($room['room_status'] ?? 'active') !== 'active') {
+                $status = 'unavailable'; $booking = null;
+            } elseif ($current) {
+                $status = 'occupied'; $booking = $current;
+            } elseif ($next) {
+                $status = 'reserved'; $booking = $next;
+            } else {
+                $status = 'available'; $booking = null;
+            }
+            if ($statusFilter !== '' && $status !== $statusFilter) continue;
+            if ($organizer !== '' && (!$booking || stripos((string) $booking['organizer_name'], $organizer) === false)) continue;
+            $card = [
+                'room' => $room,
+                'status' => $status,
+                'booking' => $booking ? [
+                    'time' => time_12h($booking['start_time']) . ' – ' . time_12h($booking['end_time']),
+                    'organizer' => $booking['organizer_name'],
+                    'title' => $booking['schedule_title'],
+                ] : null,
+            ];
+            $key = (int) $room['map_id'];
+            $grouped[$key]['map'] = ['map_id' => $key, 'map_name' => $room['map_name'], 'floor_number' => (int) $room['floor_number']];
+            $grouped[$key]['cards'][] = $card;
+            $total++;
+        }
         view('rooms/index', [
-            'title' => 'Rooms',
-            'rooms' => $this->rooms->all($mapId),
-            'maps'  => $this->maps->all(),
+            'title' => 'All Rooms',
+            'grouped' => $grouped,
+            'total' => $total,
+            'maps' => $this->maps->all(true),
+            'week' => $week,
+            'week_start' => $weekStart,
+            'prev_week' => $prevWeek,
+            'next_week' => $nextWeek,
+            'date' => $date,
+            'time' => $time,
+            'search' => $search,
             'map_id' => $mapId,
+            'status' => $statusFilter,
+            'organizer' => $organizer,
         ]);
     }
 

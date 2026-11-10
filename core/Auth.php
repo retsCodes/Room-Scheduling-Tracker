@@ -12,7 +12,8 @@ use App\Models\User;
  * scheduler / viewer from the spreadsheet's suggestions.
  *
  * Who can do what:
- * - Book / make schedules: admin, teacher and org officer only.
+ * - Book / make schedules (Add Reserve): admin, teacher, class mayor
+ *   and org officer only.
  * - Students: log in to check schedules only (read-only).
  * - Manage maps, rooms and users: admin only.
  */
@@ -45,12 +46,13 @@ final class Auth
     }
 
     /**
-     * Only admin, teacher and org officer can book rooms / make schedules.
-     * Students log in only to check schedules (read-only).
+     * Only admin, teacher, class mayor and org officer can book rooms /
+     * make schedules (Add Reserve). Students log in only to check
+     * schedules (read-only).
      */
     public static function canBook(): bool
     {
-        return in_array(self::role(), ['admin', 'teacher', 'scheduler', 'officer'], true);
+        return in_array(self::role(), ['admin', 'teacher', 'scheduler', 'officer', 'mayor'], true);
     }
 
     /** Students (and viewers) can only view schedules — no booking. */

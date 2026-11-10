@@ -61,7 +61,7 @@ final class AuthController
             flash('error', 'That account is not an admin account. Use the student login instead.');
             redirect('login/student');
         }
-        if ($scope === 'student' && !in_array($user['role'], ['student', 'teacher', 'officer', 'scheduler', 'viewer'], true)) {
+        if ($scope === 'student' && !in_array($user['role'], ['student', 'teacher', 'officer', 'mayor', 'scheduler', 'viewer'], true)) {
             flash('error', 'That is an admin account. Use the admin login instead.');
             redirect('login/admin');
         }

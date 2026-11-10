@@ -118,6 +118,16 @@ function time_12h(string $time): string
     return $ts === false ? $time : date('g:i A', $ts);
 }
 
+/** 1 -> 1st, 2 -> 2nd, 3 -> 3rd, 4 -> 4th … */
+function ordinal(int $n): string
+{
+    $suffix = 'th';
+    if (($n % 100 < 11 || $n % 100 > 13)) {
+        $suffix = [1 => 'st', 2 => 'nd', 3 => 'rd'][$n % 10] ?? 'th';
+    }
+    return $n . $suffix;
+}
+
 function status_badge(string $status): string
 {
     $map = [

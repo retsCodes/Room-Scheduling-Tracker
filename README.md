@@ -6,7 +6,9 @@ Book rooms, see who's using a room right now on a floor map, check availability,
 
 ## What it does
 
-- **Auth & roles** — register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student`, `officer` (org officer, plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. **Only admins, teachers and org officers can book rooms / make schedules** — students log in only to check schedules (read-only; booking buttons are hidden from them and the server rejects their booking requests). Admins manage maps, rooms and users.
+- **Auth & roles** — register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student`, `officer` (org officer), `mayor` (class mayor, plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. **Only admins, teachers, class mayors and org officers can book rooms / make schedules (Add Reserve)** — students log in only to check schedules (read-only; booking buttons are hidden from them and the server rejects their booking requests). Admins manage maps, rooms and users.
+- **Rooms list (visual, not tables)** — week strip (Sun–Sat with the selected day highlighted), filter bar (time, room search, floor, status, teacher/mayor search, Recent Filters), rooms grouped by floor as cards showing live status (AVAILABLE / CONFIRMED / RESERVED / UNAVAILABLE), booking time and who booked it. Click a card to open the room.
+- **Room details (visual)** — big status badge, room info, today's timeline, today's and upcoming bookings as cards, and **＋ Add Reserve** shown only to admins, teachers, class mayors and org officers.
 - **Separate logins** — admin and student logins are different pages, not one form. `/login` IS the student login (the only login linked anywhere public). `/login/admin` only accepts admin accounts and is **not linked from any student-facing page** — admins reach it by direct URL, shared privately. `/login/student` is for students (teachers and org officers log in there too). An admin account is rejected on the student page and vice versa.
 - **Home page = first floor map** — the first page anyone sees showcases the first floor layout (lowest active floor) with live room status: green available, red occupied now, amber reserved later today, grey unavailable. Click a room to open its details page; hovering previews it in the side panel with today's bookings; floor tabs switch floors; quick search filters rooms. Logged-in users get the same map plus dashboard stats.
 - **Interactive map** — rooms animate on hover/select, busy rooms pulse, floor tabs and quick search filter live, and each room page has a timeline view of today's bookings (Figma Room Details).
@@ -93,6 +95,7 @@ Demo logins after `seed.sql` (password for all three: **`password123`** — chan
 | `admin` | admin@example.com | admin | `/login/admin` (direct URL only) | Yes |
 | `jdoe` | jdoe@example.com | teacher | `/login/student` | Yes |
 | `officer` | officer@example.com | org officer | `/login/student` | Yes |
+| `mayor` | mayor@example.com | class mayor, BSIT-1A | `/login/student` | Yes |
 | `ana` | ana@example.com | student, BSIT-1A | `/login/student` | No — views only |
 
 ## Folder name / XAMPP — it just works

@@ -367,6 +367,71 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 .editor-hint { font-size: .85rem; color: var(--muted); }
 .unsaved-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--amber); margin-right: .4rem; }
 
+/* --- Visual room list (user-facing cards, not tables) ------------------------ */
+.page-label { font-size: .75rem; font-weight: 800; letter-spacing: .14em; color: var(--muted); margin: 0 0 .2rem; }
+.week-strip { padding: 1.2rem 1.4rem; }
+.week-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.week-head h2 { margin: 0; font-size: 1.15rem; }
+.week-arrow {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: var(--text); transition: background .2s ease, transform .2s ease;
+}
+.week-arrow:hover { background: var(--blue-50); text-decoration: none; transform: scale(1.08); }
+.week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: .4rem; }
+.day-cell {
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  padding: .5rem .2rem; border-radius: 14px; color: var(--text);
+  transition: background .2s ease, transform .2s ease;
+}
+.day-cell:hover { background: var(--blue-50); text-decoration: none; transform: translateY(-2px); }
+.day-name { font-size: .95rem; font-weight: 600; }
+.day-num {
+  width: 40px; height: 40px; border-radius: 50%; background: #fff;
+  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+  font-weight: 700; box-shadow: var(--shadow); transition: all .2s ease;
+}
+.day-cell.day-selected .day-num { background: var(--blue-500); border-color: var(--blue-500); color: #fff; box-shadow: 0 6px 14px rgba(59, 130, 246, .45); }
+.day-cell.day-today .day-name { color: var(--blue-700); }
+.filter-bar {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) auto auto; gap: .8rem;
+  align-items: end; padding: 1.1rem 1.25rem;
+}
+.filter-bar label { font-size: .78rem; font-weight: 800; letter-spacing: .04em; margin: 0; }
+.filter-bar input, .filter-bar select {
+  width: 100%; margin-top: .3rem; padding: .55rem .9rem; border: none; border-radius: 999px;
+  background: #e9e9f7; font: inherit; font-size: .92rem; font-weight: 500; color: var(--text);
+}
+.filter-bar input:focus, .filter-bar select:focus { outline: none; box-shadow: 0 0 0 3px var(--blue-100); background: #fff; }
+.date-line { margin: .2rem 0 1rem; font-size: 1rem; }
+.floor-section { margin-bottom: 1.4rem; animation: fadeUp .45s ease both; }
+.floor-head { display: flex; align-items: baseline; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: .5rem; margin-bottom: 1rem; }
+.floor-head h2 { margin: 0; font-size: 1.15rem; }
+.floor-count { margin-left: auto; border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: .2rem .8rem; font-size: .85rem; color: var(--muted); }
+.room-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.room-card {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 1rem 1.1rem; display: block; color: var(--text);
+  transition: transform .25s ease, box-shadow .25s ease;
+  animation: fadeUp .45s ease both;
+}
+.room-card:hover { text-decoration: none; transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.room-card-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .5rem; }
+.floor-pill { display: inline-block; border: 1px solid var(--border); background: #f8fafc; border-radius: 999px; padding: .15rem .7rem; font-size: .82rem; color: var(--muted); }
+.room-card-meta { display: flex; flex-direction: column; gap: .3rem; margin-top: .7rem; color: var(--muted); font-size: .92rem; }
+.room-card-title { margin: .6rem 0 0; font-size: .88rem; }
+
+/* --- Visual room details ----------------------------------------------------- */
+.room-hero { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.room-hero .room-big-status { margin-left: auto; font-size: 1rem; padding: .45rem 1rem; }
+.booking-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: .8rem 1rem; margin-bottom: .7rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+  transition: transform .2s ease, box-shadow .2s ease; animation: fadeUp .4s ease both;
+}
+.booking-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.booking-card .bk-time { font-weight: 800; min-width: 150px; }
+.booking-card .bk-title { flex: 1; min-width: 140px; }
+
 /* --- Profile ----------------------------------------------------------------- */
 .profile-side { text-align: center; }
 .avatar {
@@ -387,5 +452,7 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
   .map-layout, .editor-layout, .grid-2 { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .map-stats { grid-template-columns: repeat(2, 1fr); }
+  .room-card-grid { grid-template-columns: 1fr; }
+  .filter-bar { grid-template-columns: 1fr; }
   .content { padding: 1rem; }
 }
