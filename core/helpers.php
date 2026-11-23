@@ -45,6 +45,21 @@ function redirect(string $path): never
     exit;
 }
 
+// Image URL for a stored upload. The stored value is either a full
+// https URL (Vercel Blob), a relative path like uploads/profiles/..., or
+// a bare filename inside $dir (room photos).
+function img_url(?string $stored, string $dir = ''): string
+{
+    if ($stored === null || $stored === '') return '';
+    if (str_starts_with($stored, 'http://') || str_starts_with($stored, 'https://')) {
+        return $stored;
+    }
+    if (str_contains($stored, '/')) {
+        return url($stored);
+    }
+    return url(($dir !== '' ? rtrim($dir, '/') . '/' : '') . $stored);
+}
+
 function old(string $key, string $default = ''): string
 {
     return e((string) ($_SESSION['_old'][$key] ?? $default));

@@ -102,6 +102,18 @@ CREATE TABLE IF NOT EXISTS tblSchedules (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- tblSessions — database-backed PHP sessions (required on Vercel, where
+-- file sessions do not survive across serverless invocations).
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS tblSessions (
+  id VARCHAR(128) NOT NULL,
+  data TEXT NULL,
+  last_activity INT UNSIGNED NOT NULL,
+  PRIMARY KEY (id),
+  KEY idx_sessions_activity (last_activity)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- tblScheduleDays — weekdays a weekly schedule repeats on (1=Mon .. 7=Sun)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tblScheduleDays (

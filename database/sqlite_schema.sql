@@ -103,3 +103,11 @@ CREATE TABLE IF NOT EXISTS tblScheduleOccurrences (
 CREATE INDEX IF NOT EXISTS idx_occurrences_room_date ON tblScheduleOccurrences(room_id, occurrence_date, start_time);
 CREATE INDEX IF NOT EXISTS idx_occurrences_date ON tblScheduleOccurrences(occurrence_date);
 CREATE INDEX IF NOT EXISTS idx_schedules_room_dates ON tblSchedules(room_id, start_date, end_date);
+
+CREATE TABLE IF NOT EXISTS tblSessions (
+  id VARCHAR(128) NOT NULL,
+  data TEXT NULL,
+  last_activity INTEGER NOT NULL,
+  PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_activity ON tblSessions(last_activity);

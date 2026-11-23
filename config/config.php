@@ -36,6 +36,11 @@ if (!str_starts_with($dbPath, '/') && !preg_match('/^[A-Za-z]:\\\\/', $dbPath)) 
     $dbPath = $root . '/' . $dbPath;
 }
 
+$dbSslCa = env('DB_SSL_CA', '');
+if ($dbSslCa !== '' && !str_starts_with($dbSslCa, '/') && !preg_match('/^[A-Za-z]:\\\\/', $dbSslCa)) {
+    $dbSslCa = $root . '/' . $dbSslCa;
+}
+
 return [
     'app_name' => env('APP_NAME', 'Room Scheduling Tracker'),
     'app_url'  => env('APP_URL', 'http://localhost:8000'),
@@ -52,6 +57,7 @@ return [
         'password' => env('DB_PASS', ''),
         'path'     => $dbPath,
         'charset'  => 'utf8mb4',
+        'ssl_ca'   => $dbSslCa,
     ],
 
     

@@ -5,7 +5,7 @@
     <input type="file" name="room_image" accept="image/jpeg,image/png,image/gif,image/webp">
   </label>
   <?php if (!empty($room['room_image'])): ?>
-    <img class="room-photo" src="<?= url('uploads/rooms/' . e($room['room_image'])) ?>" alt="Current photo of <?= e($room['room_name']) ?>">
+    <img class="room-photo" src="<?= e(img_url($room['room_image'], 'uploads/rooms')) ?>" alt="Current photo of <?= e($room['room_name']) ?>">
     <label style="font-weight:400"><input type="checkbox" name="remove_image" value="1"> Remove current photo</label>
   <?php endif; ?>
   <label>Floor map

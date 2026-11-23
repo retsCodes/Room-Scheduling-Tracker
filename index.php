@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 
 
-session_start();
-
 require __DIR__ . '/core/helpers.php';
 
 
@@ -57,6 +55,18 @@ use App\Services\AvailabilityService;
 use App\Services\RecurrenceService;
 
 $config = require __DIR__ . '/config/config.php';
+
+// Sessions live in the database when the sessions table exists (required
+// on Vercel, where each request can land on a fresh server with no shared
+// files). Otherwise PHP's default file sessions are used.
+try {
+    $dbForSessions = Database::getInstance($config);
+    $dbForSessions->one('SELECT 1 FROM tblSessions LIMIT 1');
+    session_set_save_handler(new \App\Core\DbSessionHandler($dbForSessions), true);
+} catch (\Throwable) {
+    // No database or no sessions table yet - fall back to file sessions.
+}
+session_start();
 
 
 function view(string $name, array $data = []): void

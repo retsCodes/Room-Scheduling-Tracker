@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\BlobStorage;
 use App\Models\User;
 
 
@@ -105,14 +106,21 @@ final class ProfileController
             flash('error', 'Only JPG, PNG, GIF or WebP pictures are allowed.');
             redirect('profile');
         }
-        $dir = dirname(__DIR__) . '/' . self::AVATAR_DIR;
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
         $name = 'user_' . $id . '.' . $ext;
-        if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
-            flash('error', 'Could not save the picture.');
-            redirect('profile');
+        $stored = null;
+        if (BlobStorage::enabled()) {
+            $stored = BlobStorage::upload($file['tmp_name'], 'profiles/' . $name, $info['mime']);
         }
-        $this->users->updateProfileImg($id, self::AVATAR_DIR . '/' . $name);
+        if ($stored === null) {
+            $dir = dirname(__DIR__) . '/' . self::AVATAR_DIR;
+            if (!is_dir($dir)) mkdir($dir, 0755, true);
+            if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
+                flash('error', 'Could not save the picture.');
+                redirect('profile');
+            }
+            $stored = self::AVATAR_DIR . '/' . $name;
+        }
+        $this->users->updateProfileImg($id, $stored);
         $user = $this->users->find($id);
         $_SESSION['user'] = array_merge($_SESSION['user'] ?? [], $user);
         flash('success', 'Profile picture updated.');

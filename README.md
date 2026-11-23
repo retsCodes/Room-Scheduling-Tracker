@@ -154,6 +154,15 @@ php -S localhost:8000
 - Output is escaped with `htmlspecialchars` via `e()`.
 - `.env` (real credentials) is git-ignored; only `.env.example` is committed.
 
+## Deploying to Vercel + TiDB Cloud (free, auto-deploys from GitHub)
+
+- **Vercel** hosts the app: connect the GitHub repo, and every push to `main` redeploys it. PHP runs through the community `vercel-php` runtime (see `vercel.json` + `api/index.php`); static files under `assets/` are served directly.
+- **TiDB Cloud Starter** is the database (free, MySQL-compatible, no card). Create a cluster, make a database, and import `database/rst_db.sql` then `database/seed.sql`. Run `database/migrations/003_add_sessions_table.sql` on an existing database.
+- **Environment variables on Vercel:** `DB_DRIVER=mysql`, `DB_HOST`, `DB_PORT=4000`, `DB_NAME`, `DB_USER`, `DB_PASS`, `DB_SSL_CA=config/cacert.pem` (TLS is required by TiDB), `APP_URL` set to the Vercel domain.
+- **Sessions** live in `tblSessions` whenever that table exists, because file sessions do not survive across Vercel's serverless invocations. Without the table the app falls back to file sessions (XAMPP behaviour).
+- **Uploads** (room photos, avatars) go to Vercel Blob when a Blob store is linked to the project (`BLOB_READ_WRITE_TOKEN` is injected automatically); otherwise they save under `uploads/` as usual.
+- **Database migrations:** `001_add_admin_confirmed.sql`, `002_add_map_decorations_and_room_image.sql`, `003_add_sessions_table.sql` - run once each on an existing database; fresh installs already have all three in `rst_db.sql`.
+
 ## License
 
 MIT - do what you want with it, school project friendly.

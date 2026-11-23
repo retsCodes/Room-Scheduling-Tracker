@@ -5,7 +5,7 @@
   <section class="card profile-side">
     <div class="avatar">
       <?php if (!empty($user['profile_img'])): ?>
-        <img src="<?= url($user['profile_img']) ?>" alt="Profile picture">
+        <img src="<?= e(img_url($user['profile_img'])) ?>" alt="Profile picture">
       <?php else: ?>
         <span class="avatar-silhouette">👤</span>
       <?php endif; ?>

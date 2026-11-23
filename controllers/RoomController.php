@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\BlobStorage;
 use App\Models\Map;
 use App\Models\Room;
 use App\Models\ScheduleOccurrence;
@@ -223,10 +224,15 @@ final class RoomController
         if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return $current;
         $info = getimagesize($file['tmp_name']);
         $ext = $info ? (self::ROOM_IMAGE_TYPES[$info['mime']] ?? 'jpg') : 'jpg';
+        $mime = $info['mime'] ?? 'image/jpeg';
+        $name = 'room_' . $id . '.' . $ext;
+        if (BlobStorage::enabled()) {
+            $url = BlobStorage::upload($file['tmp_name'], 'rooms/' . $name, $mime);
+            if ($url !== null) return $url;
+        }
         $dir = dirname(__DIR__) . '/' . self::ROOM_IMAGE_DIR;
         if (!is_dir($dir)) mkdir($dir, 0755, true);
-        $name = 'room_' . $id . '.' . $ext;
-        if ($current && $current !== $name) {
+        if ($current && !str_starts_with($current, 'http') && $current !== $name) {
             $old = $dir . '/' . basename($current);
             if (is_file($old)) unlink($old);
         }
@@ -237,6 +243,7 @@ final class RoomController
     private function removeImage(?string $current): void
     {
         if (!$current) return;
+        if (str_starts_with($current, 'http://') || str_starts_with($current, 'https://')) return;
         $old = dirname(__DIR__) . '/' . self::ROOM_IMAGE_DIR . '/' . basename($current);
         if (is_file($old)) unlink($old);
     }

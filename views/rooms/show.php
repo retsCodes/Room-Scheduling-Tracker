@@ -35,7 +35,7 @@ $barClass = function ($o) {
 <div class="rd-grid">
   <section class="card rd-left">
     <?php if (!empty($room['room_image'])): ?>
-      <img class="room-photo" src="<?= url('uploads/rooms/' . e($room['room_image'])) ?>" alt="Photo of <?= e($room['room_name']) ?>">
+      <img class="room-photo" src="<?= e(img_url($room['room_image'], 'uploads/rooms')) ?>" alt="Photo of <?= e($room['room_name']) ?>">
     <?php elseif (\App\Core\Auth::isAdmin()): ?>
       <div class="photo-placeholder">
         <p class="muted" style="margin:0">🖼️ No photo yet</p>
