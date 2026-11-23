@@ -29,7 +29,7 @@ final class ScheduleController
         Auth::requireLogin();
         $filters = [
             'room_id' => isset($_GET['room_id']) && $_GET['room_id'] !== '' ? (int) $_GET['room_id'] : null,
-            'status'  => $_GET['status'] ?? '',
+            'status'  => $_GET['status'] ?? 'active',
             'search'  => trim((string) ($_GET['search'] ?? '')),
         ];
         $filters = array_filter($filters, fn ($v) => $v !== '' && $v !== null);
@@ -250,40 +250,80 @@ final class ScheduleController
             flash('error', 'Schedule not found.');
             redirect('schedules');
         }
-        $type = in_array($_POST['exception_type'] ?? '', ScheduleException::TYPES, true)
-            ? $_POST['exception_type'] : 'skipped';
-        $original = (string) ($_POST['original_date'] ?? '');
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $original)) {
-            flash('error', 'Pick the original occurrence date.');
-            redirect('schedules/' . $id);
+        $asArray = fn($v) => is_array($v) ? $v : [$v];
+        $originals = $asArray($_POST['original_date'] ?? []);
+        $types = $asArray($_POST['exception_type'] ?? []);
+        $newDates = $asArray($_POST['new_date'] ?? []);
+        $newRooms = $asArray($_POST['new_room_id'] ?? []);
+        $newStarts = $asArray($_POST['new_start_time'] ?? []);
+        $newEnds = $asArray($_POST['new_end_time'] ?? []);
+        $reasons = $asArray($_POST['exception_reason'] ?? []);
+        $rows = [];
+        foreach ($originals as $i => $original) {
+            $original = (string) $original;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $original)) continue;
+            $type = in_array($types[$i] ?? '', ScheduleException::TYPES, true) ? $types[$i] : 'skipped';
+            $newDate = trim((string) ($newDates[$i] ?? '')) ?: null;
+            if ($type === 'moved' && !$newDate) {
+                flash('error', 'A moved exception needs a new date.');
+                redirect('schedules/' . $id);
+            }
+            $rows[] = [
+                'schedule_id' => $id,
+                'original_date' => $original,
+                'exception_type' => $type,
+                'new_date' => $newDate,
+                'new_room_id' => !empty($newRooms[$i]) ? (int) $newRooms[$i] : null,
+                'new_start_time' => trim((string) ($newStarts[$i] ?? '')) ?: null,
+                'new_end_time' => trim((string) ($newEnds[$i] ?? '')) ?: null,
+                'exception_reason' => trim((string) ($reasons[$i] ?? '')) ?: null,
+                'created_by' => Auth::id(),
+            ];
         }
-        $data = [
-            'schedule_id' => $id,
-            'original_date' => $original,
-            'exception_type' => $type,
-            'new_date' => trim((string) ($_POST['new_date'] ?? '')) ?: null,
-            'new_room_id' => !empty($_POST['new_room_id']) ? (int) $_POST['new_room_id'] : null,
-            'new_start_time' => trim((string) ($_POST['new_start_time'] ?? '')) ?: null,
-            'new_end_time' => trim((string) ($_POST['new_end_time'] ?? '')) ?: null,
-            'exception_reason' => trim((string) ($_POST['exception_reason'] ?? '')) ?: null,
-            'created_by' => Auth::id(),
-        ];
-        if ($type === 'moved' && !$data['new_date']) {
-            flash('error', 'A moved occurrence needs a new date.');
+        if (empty($rows)) {
+            flash('error', 'Add at least one exception with a valid original date.');
             redirect('schedules/' . $id);
         }
         $this->db->begin();
         try {
-            $this->exceptions->create($data);
+            foreach ($rows as $row) $this->exceptions->create($row);
             $saved = $this->schedules->find($id);
             $this->recurrence->generate($saved);
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollback();
-            flash('error', 'Could not save the exception: ' . $e->getMessage());
+            flash('error', 'Could not save the exceptions: ' . $e->getMessage());
             redirect('schedules/' . $id);
         }
-        flash('success', 'Exception saved and occurrences updated.');
+        flash('success', count($rows) === 1 ? 'Exception saved and occurrences updated.' : count($rows) . ' exceptions saved and occurrences updated.');
+        redirect('schedules/' . $id);
+    }
+
+    public function deleteException(int $id, int $exceptionId): void
+    {
+        Auth::requireCanBook();
+        if (!is_post() || !verify_csrf()) {
+            flash('error', 'Invalid request.');
+            redirect('schedules/' . $id);
+        }
+        $schedule = $this->schedules->find($id);
+        $ex = $this->exceptions->find($exceptionId);
+        if ($schedule === null || $ex === null || (int) $ex['schedule_id'] !== $id) {
+            flash('error', 'Exception not found.');
+            redirect('schedules/' . $id);
+        }
+        $this->db->begin();
+        try {
+            $this->exceptions->delete($exceptionId);
+            $saved = $this->schedules->find($id);
+            $this->recurrence->generate($saved);
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollback();
+            flash('error', 'Could not remove the exception: ' . $e->getMessage());
+            redirect('schedules/' . $id);
+        }
+        flash('success', 'Exception removed and occurrences updated.');
         redirect('schedules/' . $id);
     }
 

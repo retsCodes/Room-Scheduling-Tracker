@@ -22,10 +22,15 @@ foreach ($rooms as $r) {
 }
 $canBook = \App\Core\Auth::canBook();
 ?>
+<?php $searchTerm = trim((string) ($search ?? '')); ?>
 <div class="floor-tabs" role="tablist">
   <?php foreach ($maps as $m): ?>
+    <?php
+      $tabHref = isset($tab_url_prefix) ? $tab_url_prefix . (int) $m['map_id'] : url('maps/' . (int) $m['map_id']);
+      if ($searchTerm !== '') $tabHref .= (str_contains($tabHref, '?') ? '&' : '?') . 'search=' . urlencode($searchTerm);
+    ?>
     <a class="floor-tab <?= (int) $m['map_id'] === (int) $map['map_id'] ? 'active' : '' ?>"
-       href="<?= isset($tab_url_prefix) ? e($tab_url_prefix . (int) $m['map_id']) : url('maps/' . (int) $m['map_id']) ?>"
+       href="<?= e($tabHref) ?>"
        role="tab"><?= e($m['map_name']) ?></a>
   <?php endforeach; ?>
 </div>
@@ -33,7 +38,6 @@ $canBook = \App\Core\Auth::canBook();
 <div class="map-layout">
   <div>
     <div class="map-canvas card" style="margin-bottom:0">
-      <span class="map-title">📍 <?= e($map['map_name']) ?> · Floor <?= (int) $map['floor_number'] ?></span>
       <svg viewBox="0 0 <?= (int) $map['map_width'] ?> <?= (int) $map['map_height'] ?>" role="img" aria-label="Floor map of <?= e($map['map_name']) ?>">
         <?= Map::decorationsToSvg(json_decode((string) ($map['decorations'] ?? ''), true) ?: []) ?>
         <?php foreach ($rooms as $r):
@@ -78,7 +82,14 @@ $canBook = \App\Core\Auth::canBook();
         <span class="legend-item"><span class="dot dot-unavailable"></span> Unavailable</span>
       </div>
       <h3 style="margin-top:1rem">Quick search</h3>
-      <input class="search-box" type="search" id="room-search" placeholder="Search rooms… (e.g. 101)">
+      <input class="search-box" type="search" id="room-search" placeholder="Search all floors… (e.g. 101)" value="<?= e($searchTerm) ?>">
+      <p class="muted" id="search-count" style="margin:.4rem 0 0"></p>
+      <div id="search-nav" style="display:none;margin-top:.5rem">
+        <button class="btn btn-small" type="button" id="search-prev">← Prev</button>
+        <span class="muted" id="search-position" style="margin:0 .4rem"></span>
+        <button class="btn btn-small" type="button" id="search-next">Next →</button>
+      </div>
+      <ul class="clean-list search-results" id="search-results" style="margin-top:.5rem"></ul>
     </div>
     <?php if (!empty($show_editor_link) && \App\Core\Auth::isAdmin()): ?>
     <div class="card">
@@ -100,4 +111,9 @@ $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
   'bookUrl' => url('schedules/create'),
   'roomUrl' => url('rooms/'),
   'mapId'   => (int) $map['map_id'],
+  'selectedRoomId' => (int) ($selected_room_id ?? 0),
 ], $jsonFlags) ?></script>
+<script type="application/json" id="map-search-data"><?= json_encode(array_map(fn($r) => [
+  'room_id' => (int) $r['room_id'], 'room_name' => $r['room_name'],
+  'map_id' => (int) $r['map_id'], 'map_name' => $r['map_name'],
+], $search_rooms ?? []), $jsonFlags) ?></script>

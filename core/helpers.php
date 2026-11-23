@@ -109,6 +109,16 @@ function ordinal(int $n): string
     return $n . $suffix;
 }
 
+function recurrence_label(string $type): string
+{
+    return [
+        'one_time' => 'One time',
+        'daily' => 'Daily',
+        'weekly' => 'Weekly',
+        'monthly' => 'Monthly',
+    ][$type] ?? ucfirst(str_replace('_', ' ', $type));
+}
+
 function confirm_badge($confirmed): string
 {
     return ((int) $confirmed === 1)

@@ -2,7 +2,7 @@
 <div class="page-head">
   <div>
     <h1>Admin dashboard</h1>
-    <p class="muted">Manage maps, rooms, schedules and users. Confirm bookings below to give them the green light.</p>
+    <p class="muted">Manage maps, rooms, schedules and users.</p>
   </div>
   <div style="display:flex;gap:.5rem;flex-wrap:wrap">
     <a class="btn" href="<?= url('maps/create') ?>">+ New map</a>

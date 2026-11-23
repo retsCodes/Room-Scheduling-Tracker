@@ -62,8 +62,10 @@
     });
     return Math.max(1, lanes.length);
   }
-  function statusClass(s) {
-    return s === 'cancelled' ? 'tl-red' : s === 'completed' ? 'tl-green' : 'tl-blue';
+  function statusClass(b) {
+    if (b.status === 'cancelled') return 'tl-red';
+    if (b.status === 'completed') return 'tl-green';
+    return b.confirmed ? 'tl-blue' : 'tl-amber';
   }
   function render() {
     var span = viewEnd - viewStart;
@@ -94,7 +96,7 @@
         var width = Math.max(1.5, right - left);
         var label = (b.confirmed ? '✓ ' : '') + b.title;
         if (width < 12) label = b.confirmed ? '✓' : '';
-        lanesHtml += '<a class="timeline-block ' + statusClass(b.status) + (b.confirmed ? ' tl-confirmed' : '') + '" style="left:' + left.toFixed(1) + '%;width:' + width.toFixed(1) + '%" href="' + esc(b.url) + '" title="' + esc(b.title + ' ' + b.time + (b.confirmed ? ' - admin confirmed' : '')) + '">' + esc(label) + '</a>';
+        lanesHtml += '<a class="timeline-block ' + statusClass(b) + (b.confirmed ? ' tl-confirmed' : '') + '" style="left:' + left.toFixed(1) + '%;width:' + width.toFixed(1) + '%" href="' + esc(b.url) + '" title="' + esc(b.title + ' ' + b.time + (b.confirmed ? ' - admin confirmed' : '')) + '">' + esc(label) + '</a>';
       });
       lanesHtml += '</div>';
     }

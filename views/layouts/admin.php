@@ -29,7 +29,7 @@ if ($current === '') {
       <a href="<?= url('maps') ?>" class="<?= $current === 'maps' ? 'active' : '' ?>"><span class="nav-icon">🗺️</span> Maps</a>
       <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
       <a href="<?= url('schedules') ?>" class="<?= $current === 'schedules' ? 'active' : '' ?>"><span class="nav-icon">📅</span> Schedules</a>
-      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">📌</span> Occurrences</a>
+      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">🕘</span> History</a>
       <p class="nav-section">People</p>
       <a href="<?= url('users') ?>" class="<?= $current === 'users' ? 'active' : '' ?>"><span class="nav-icon">👥</span> User List</a>
       <p class="nav-section">Account</p>

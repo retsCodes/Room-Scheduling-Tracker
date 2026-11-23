@@ -64,17 +64,103 @@
     shape.addEventListener('mouseenter', function () { selectRoom(shape); });
   });
 
-  var search = document.getElementById('room-search');
-  if (search) {
-    search.addEventListener('input', function () {
-      var q = search.value.trim().toLowerCase();
-      shapes.forEach(function (shape) {
-        var name = (shape.getAttribute('data-name') || '').toLowerCase();
-        shape.classList.toggle('room-dim', q !== '' && name.indexOf(q) === -1);
+  var searchDataEl = document.getElementById('map-search-data');
+  var searchRooms = [];
+  try { searchRooms = JSON.parse(searchDataEl ? searchDataEl.textContent || '[]' : '[]'); } catch (e) {}
+  if (!Array.isArray(searchRooms)) searchRooms = [];
+
+  var searchInput = document.getElementById('room-search');
+  var searchCount = document.getElementById('search-count');
+  var searchNav = document.getElementById('search-nav');
+  var searchPos = document.getElementById('search-position');
+  var searchResults = document.getElementById('search-results');
+  var matches = [];
+  var matchIndex = -1;
+
+  function currentFloorUrl(mapId, roomId) {
+    var q = 'search=' + encodeURIComponent(searchInput ? searchInput.value.trim() : '') + '&room=' + roomId;
+    var path = window.location.pathname;
+    if (/\/maps\/\d+/.test(path)) {
+      return path.replace(/\/maps\/\d+/, '/maps/' + mapId) + '?' + q;
+    }
+    return path + '?map=' + mapId + '&' + q;
+  }
+  function updateSearchUi() {
+    if (!searchCount) return;
+    if (!matches.length) {
+      searchCount.textContent = searchInput && searchInput.value.trim() !== '' ? 'No rooms match.' : '';
+      if (searchNav) searchNav.style.display = 'none';
+      if (searchResults) searchResults.innerHTML = '';
+      return;
+    }
+    searchCount.textContent = matches.length + (matches.length === 1 ? ' match' : ' matches');
+    if (searchNav) searchNav.style.display = '';
+    if (searchPos) searchPos.textContent = (matchIndex + 1) + ' of ' + matches.length;
+    if (searchResults) {
+      var html = '';
+      matches.slice(0, 8).forEach(function (m, i) {
+        var onThisFloor = shapes.some(function (s) { return +s.getAttribute('data-room-id') === m.room_id; });
+        html += '<li><a href="#" data-match="' + i + '"' + (i === matchIndex ? ' style="font-weight:700"' : '') + '>' + escapeHtml(m.room_name) + ' <span class="muted">- ' + escapeHtml(m.map_name) + (onThisFloor ? '' : ' &rarr;') + '</span></a></li>';
       });
+      if (matches.length > 8) html += '<li class="muted">+ ' + (matches.length - 8) + ' more - refine your search</li>';
+      searchResults.innerHTML = html;
+    }
+  }
+  function goToMatch(i) {
+    if (!matches.length) return;
+    matchIndex = ((i % matches.length) + matches.length) % matches.length;
+    var m = matches[matchIndex];
+    updateSearchUi();
+    var shape = shapes.filter(function (s) { return +s.getAttribute('data-room-id') === m.room_id; })[0];
+    if (shape) {
+      selectRoom(shape);
+    } else {
+      window.location.assign(currentFloorUrl(m.map_id, m.room_id));
+    }
+  }
+  function runSearch() {
+    var q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    matches = q === '' ? [] : searchRooms.filter(function (r) { return (r.room_name || '').toLowerCase().indexOf(q) !== -1; });
+    matchIndex = matches.length ? 0 : -1;
+    shapes.forEach(function (shape) {
+      var name = (shape.getAttribute('data-name') || '').toLowerCase();
+      shape.classList.toggle('room-dim', q !== '' && name.indexOf(q) === -1);
+    });
+    updateSearchUi();
+    return matches;
+  }
+  if (searchInput) {
+    searchInput.addEventListener('input', runSearch);
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); goToMatch(matchIndex + 1); }
     });
   }
+  if (searchResults) {
+    searchResults.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('a[data-match]') : null;
+      if (!a) return;
+      e.preventDefault();
+      goToMatch(+a.getAttribute('data-match'));
+    });
+  }
+  var prevBtn = document.getElementById('search-prev');
+  var nextBtn = document.getElementById('search-next');
+  if (prevBtn) prevBtn.addEventListener('click', function () { goToMatch(matchIndex - 1); });
+  if (nextBtn) nextBtn.addEventListener('click', function () { goToMatch(matchIndex + 1); });
 
-  var first = shapes.filter(function (s) { return s.getAttribute('data-status') === 'occupied'; })[0] || shapes[0];
+  var selectedId = meta.selectedRoomId || 0;
+  var first = null;
+  if (selectedId) {
+    first = shapes.filter(function (s) { return +s.getAttribute('data-room-id') === selectedId; })[0] || null;
+  }
+  if (!first) first = shapes.filter(function (s) { return s.getAttribute('data-status') === 'occupied'; })[0] || shapes[0];
   if (first) selectRoom(first);
+  if (searchInput && searchInput.value.trim() !== '') {
+    runSearch();
+    if (selectedId) {
+      var mi = -1;
+      for (var k = 0; k < matches.length; k++) { if (matches[k].room_id === selectedId) { mi = k; break; } }
+      if (mi >= 0) { matchIndex = mi; updateSearchUi(); }
+    }
+  }
 })();

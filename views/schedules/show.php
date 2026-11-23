@@ -12,7 +12,7 @@
 <div class="card">
   <p><strong>Room:</strong> <a href="<?= url('rooms/' . (int) $schedule['room_id']) ?>"><?= e($schedule['room_name']) ?></a> (<?= e($schedule['map_name']) ?>)</p>
   <p><strong>Organizer:</strong> <?= e($schedule['organizer_name']) ?></p>
-  <p><strong>Recurrence:</strong> <?= e($schedule['recurrence_type']) ?><?php if (!empty($schedule['days'])): ?> - <?= implode(', ', array_map(fn($d) => date('l', strtotime('2026-11-0' . ($d + 1))), $schedule['days'])) ?><?php endif; ?></p>
+  <p><strong>Recurrence:</strong> <?= e(recurrence_label($schedule['recurrence_type'])) ?><?php if (!empty($schedule['days'])): ?> - <?= implode(', ', array_map(fn($d) => date('l', strtotime('2026-11-0' . ($d + 1))), $schedule['days'])) ?><?php endif; ?></p>
   <p><strong>Dates:</strong> <?= e($schedule['start_date']) ?><?= $schedule['end_date'] ? ' → ' . e($schedule['end_date']) : '' ?></p>
   <p><strong>Time:</strong> <?= time_12h($schedule['start_time']) ?>–<?= time_12h($schedule['end_time']) ?></p>
   <p><strong>Status:</strong> <?= status_badge($schedule['schedule_status']) ?></p>
@@ -24,8 +24,8 @@
   <?php if (!empty($schedule['schedule_description'])): ?><p><?= e($schedule['schedule_description']) ?></p><?php endif; ?>
 </div>
 
-<h2>Occurrences</h2>
-<?php if (empty($occurrences)): ?><p class="muted">No occurrences generated yet.</p>
+<h2>Dates</h2>
+<?php if (empty($occurrences)): ?><p class="muted">No dates generated yet.</p>
 <?php else: ?>
 <table class="table card">
   <thead><tr><th>Date</th><th>Time</th><th>Status</th><th></th></tr></thead>
@@ -51,37 +51,71 @@
 <?php endif; ?>
 
 <?php if (\App\Core\Auth::canBook()): ?>
-<h2>Add an exception</h2>
-<p class="muted">Skip, move or modify a single occurrence without changing the whole series.</p>
+<h2>Add exceptions</h2>
+<p class="muted">Skip, move or modify occurrences without changing the whole series. Add as many as you need, then save them all at once.</p>
 <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/exceptions') ?>" class="card form">
   <?= csrf_field() ?>
-  <div class="grid-2">
-    <label>Original date <input type="date" name="original_date" required></label>
-    <label>Exception type
-      <select name="exception_type">
-        <option value="skipped">Skipped</option>
-        <option value="moved">Moved</option>
-        <option value="modified">Modified</option>
-      </select>
-    </label>
-    <label>New date (for moved) <input type="date" name="new_date"></label>
-    <label>New room (optional)
-      <select name="new_room_id"><option value="">Keep same room</option>
-      <?php foreach ($rooms as $r): ?><option value="<?= (int) $r['room_id'] ?>"><?= e($r['room_name']) ?></option><?php endforeach; ?>
-      </select>
-    </label>
-    <label>New start time <input type="time" name="new_start_time"></label>
-    <label>New end time <input type="time" name="new_end_time"></label>
+  <div id="exception-rows">
+    <div class="exception-row">
+      <div class="grid-2">
+        <label>Original date <input type="date" name="original_date[]"></label>
+        <label>Exception type
+          <select name="exception_type[]">
+            <option value="skipped">Skipped</option>
+            <option value="moved">Moved</option>
+            <option value="modified">Modified</option>
+          </select>
+        </label>
+        <label>New date (for moved) <input type="date" name="new_date[]"></label>
+        <label>New room (optional)
+          <select name="new_room_id[]"><option value="">Keep same room</option>
+          <?php foreach ($rooms as $r): ?><option value="<?= (int) $r['room_id'] ?>"><?= e($r['room_name']) ?></option><?php endforeach; ?>
+          </select>
+        </label>
+        <label>New start time <input type="time" name="new_start_time[]"></label>
+        <label>New end time <input type="time" name="new_end_time[]"></label>
+      </div>
+      <label>Reason <input type="text" name="exception_reason[]" maxlength="255" placeholder="Room unavailable for maintenance"></label>
+      <p><button class="btn btn-small btn-danger exception-remove-row" type="button" style="display:none">Remove this exception</button></p>
+    </div>
   </div>
-  <label>Reason <input type="text" name="exception_reason" maxlength="255" placeholder="Room unavailable for maintenance"></label>
-  <button class="btn btn-primary" type="submit">Save exception</button>
+  <p><button class="btn btn-small" type="button" id="exception-add-row">+ Add another exception</button></p>
+  <button class="btn btn-primary" type="submit">Save exceptions</button>
 </form>
+<script>
+(function () {
+  var rows = document.getElementById('exception-rows');
+  var addBtn = document.getElementById('exception-add-row');
+  if (!rows || !addBtn) return;
+  function refreshRemove() {
+    var rs = rows.querySelectorAll('.exception-row');
+    rs.forEach(function (r) {
+      var b = r.querySelector('.exception-remove-row');
+      if (b) b.style.display = rs.length > 1 ? '' : 'none';
+    });
+  }
+  addBtn.addEventListener('click', function () {
+    var first = rows.querySelector('.exception-row');
+    var clone = first.cloneNode(true);
+    clone.querySelectorAll('input, select').forEach(function (el) { el.value = ''; });
+    rows.appendChild(clone);
+    refreshRemove();
+  });
+  rows.addEventListener('click', function (e) {
+    if (e.target.classList && e.target.classList.contains('exception-remove-row')) {
+      e.target.closest('.exception-row').remove();
+      refreshRemove();
+    }
+  });
+  refreshRemove();
+})();
+</script>
 <?php endif; ?>
 
 <?php if (!empty($exceptions)): ?>
 <h2>Exceptions</h2>
 <table class="table card">
-  <thead><tr><th>Original date</th><th>Type</th><th>New date / room / time</th><th>Reason</th><th>By</th></tr></thead>
+  <thead><tr><th>Original date</th><th>Type</th><th>New date / room / time</th><th>Reason</th><th>By</th><?php if (\App\Core\Auth::canBook()): ?><th></th><?php endif; ?></tr></thead>
   <tbody>
     <?php foreach ($exceptions as $ex): ?>
     <tr>
@@ -90,6 +124,11 @@
       <td><?= e($ex['new_date'] ?? '-') ?> <?= e($ex['new_room_name'] ?? '') ?> <?= $ex['new_start_time'] ? time_12h($ex['new_start_time']) . '–' . time_12h($ex['new_end_time']) : '' ?></td>
       <td><?= e($ex['exception_reason'] ?? '') ?></td>
       <td><?= e($ex['created_by_name']) ?></td>
+      <?php if (\App\Core\Auth::canBook()): ?>
+      <td>
+        <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/exceptions/' . (int) $ex['exception_id'] . '/delete') ?>" class="inline-form" data-confirm="Remove this exception? The original occurrence comes back."><?= csrf_field() ?><button class="btn btn-small btn-danger" type="submit">Remove</button></form>
+      </td>
+      <?php endif; ?>
     </tr>
     <?php endforeach; ?>
   </tbody>

@@ -231,6 +231,8 @@ try {
         $scheduleCtl->confirm((int) $p['id']);
     } elseif (($p = $match($segments, 'schedules/{id}/exceptions')) && $isPost) {
         $scheduleCtl->storeException((int) $p['id']);
+    } elseif (($p = $match($segments, 'schedules/{id}/exceptions/{exceptionId}/delete')) && $isPost) {
+        $scheduleCtl->deleteException((int) $p['id'], (int) $p['exceptionId']);
     } elseif ($path === 'occurrences' && !$isPost) {
         $occCtl->index();
     } elseif (($p = $match($segments, 'occurrences/{id}/status')) && $isPost) {

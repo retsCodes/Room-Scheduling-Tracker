@@ -72,6 +72,9 @@ final class DashboardController
             'first_rooms' => $firstRooms,
             'busy'        => $busy,
             'today_date'  => $today,
+            'search_rooms' => $this->rooms->all(),
+            'search'      => trim((string) ($_GET['search'] ?? '')),
+            'selected_room_id' => (int) ($_GET['room'] ?? 0),
             'extra_js'    => 'assets/js/map.js',
         ]);
     }

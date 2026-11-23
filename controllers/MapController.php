@@ -45,6 +45,9 @@ final class MapController
             'title' => $map['map_name'],
             'map' => $map, 'maps' => $this->maps->all(true), 'rooms' => $rooms,
             'busy' => $busyIds, 'today' => $todayOcc, 'today_date' => $today,
+            'search_rooms' => $this->rooms->all(),
+            'search' => trim((string) ($_GET['search'] ?? '')),
+            'selected_room_id' => (int) ($_GET['room'] ?? 0),
             'extra_js' => 'assets/js/map.js',
         ]);
     }

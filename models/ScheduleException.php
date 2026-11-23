@@ -25,6 +25,11 @@ final class ScheduleException
         );
     }
 
+    public function find(int $id): ?array
+    {
+        return $this->db->one('SELECT * FROM tblScheduleExceptions WHERE exception_id = ?', [$id]);
+    }
+
     public function findForDate(int $scheduleId, string $date): ?array
     {
         return $this->db->one(

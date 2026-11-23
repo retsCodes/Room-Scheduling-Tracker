@@ -2,7 +2,7 @@
   <h1>Schedules</h1>
   <?php if (\App\Core\Auth::canBook()): ?><a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a><?php endif; ?>
 </div>
-<?php if (\App\Core\Auth::isReadOnly()): ?><p class="muted">You're viewing schedules as a student - only admins, teachers, class mayors and org officers can book rooms.</p><?php endif; ?>
+<?php if (\App\Core\Auth::isReadOnly()): ?><p class="muted">Viewing as a student - booking is for teachers, mayors and org officers.</p><?php endif; ?>
 <form method="get" action="<?= url('schedules') ?>" class="card form">
   <div class="grid-2">
     <label>Search title <input type="search" name="search" placeholder="Search title…" value="<?= e($filters['search'] ?? '') ?>"></label>
@@ -35,7 +35,7 @@
     <tr>
       <td><a href="<?= url('schedules/' . (int) $s['schedule_id']) ?>"><?= e($s['schedule_title']) ?></a></td>
       <td class="nowrap"><?= e($s['room_name']) ?></td>
-      <td><?= e($s['recurrence_type']) ?><?php if ($s['recurrence_type'] === 'weekly' && !empty($s['days'])): ?> (<?= implode(', ', array_map('day_name', $s['days'])) ?>)<?php endif; ?></td>
+      <td><?= e(recurrence_label($s['recurrence_type'])) ?><?php if ($s['recurrence_type'] === 'weekly' && !empty($s['days'])): ?> (<?= implode(', ', array_map('day_name', $s['days'])) ?>)<?php endif; ?></td>
       <td class="nowrap"><?= e($s['start_date']) ?><?= $s['end_date'] ? ' → ' . e($s['end_date']) : '' ?></td>
       <td class="nowrap"><?= time_12h($s['start_time']) ?>–<?= time_12h($s['end_time']) ?></td>
       <td><?= e($s['organizer_name']) ?></td>

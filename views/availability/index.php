@@ -1,5 +1,5 @@
 <h1>Check availability</h1>
-<p class="muted">Pick a date and time to see every room, what is already booked there, and whether an admin has confirmed it. Rooms with bookings can still be booked - an admin confirms which one goes ahead.</p>
+<p class="muted">Pick a date and time to see every room. Rooms with bookings can still be booked - an admin confirms which one goes ahead.</p>
 <form method="get" action="<?= url('availability') ?>" class="card form">
   <div class="grid-2">
     <label>Date <input type="date" name="date" required value="<?= e($date) ?>"></label>

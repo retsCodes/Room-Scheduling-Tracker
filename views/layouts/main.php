@@ -33,7 +33,7 @@ if ($current === '') {
       <a href="<?= url('schedules') ?>" class="<?= $current === 'schedules' ? 'active' : '' ?>"><span class="nav-icon">📅</span> Schedules</a>
       <a href="<?= url('calendar') ?>" class="<?= $current === 'calendar' ? 'active' : '' ?>"><span class="nav-icon">🗓️</span> Calendar</a>
       <a href="<?= url('availability') ?>" class="<?= $current === 'availability' ? 'active' : '' ?>"><span class="nav-icon">🔍</span> Availability</a>
-      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">📌</span> Occurrences</a>
+      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">🕘</span> History</a>
       <p class="nav-section">Account</p>
       <a href="<?= url('profile') ?>" class="<?= $current === 'profile' ? 'active' : '' ?>"><span class="nav-icon">👤</span> My Profile</a>
       <?php if ($isAdmin): ?>

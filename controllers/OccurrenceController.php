@@ -19,7 +19,7 @@ final class OccurrenceController
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = date('Y-m-d');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = date('Y-m-d', strtotime('+30 days'));
         view('occurrences/index', [
-            'title' => 'Occurrences',
+            'title' => 'History',
             'occurrences' => $this->occurrences->forDateRange($from, $to, $roomId),
             'from' => $from, 'to' => $to, 'room_id' => $roomId,
         ]);
