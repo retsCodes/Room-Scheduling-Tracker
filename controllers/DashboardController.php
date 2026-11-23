@@ -32,6 +32,12 @@ final class DashboardController
         
         $activeMaps = $this->maps->all(true);
         $firstMap = $activeMaps[0] ?? null;
+        $wantedMap = (int) ($_GET['map'] ?? 0);
+        if ($wantedMap) {
+            foreach ($activeMaps as $m) {
+                if ((int) $m['map_id'] === $wantedMap) { $firstMap = $m; break; }
+            }
+        }
         $firstRooms = $firstMap ? $this->rooms->all((int) $firstMap['map_id']) : [];
         $busy = [];
         if ($firstMap) {

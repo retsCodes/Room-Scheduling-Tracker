@@ -135,7 +135,11 @@ $segments = $path === '' ? [] : explode('/', $path);
 
 try {
     if ($path === '') {
-        redirect(Auth::check() ? 'rooms' : 'login');
+        if (Auth::check()) {
+            $dashboard->index();
+        } else {
+            redirect('login');
+        }
     } elseif ($path === 'login' && !$isPost) {
         $auth->showLogin();
     } elseif ($path === 'login' && $isPost) {

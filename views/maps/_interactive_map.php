@@ -24,7 +24,7 @@ $canBook = \App\Core\Auth::canBook();
 <div class="floor-tabs" role="tablist">
   <?php foreach ($maps as $m): ?>
     <a class="floor-tab <?= (int) $m['map_id'] === (int) $map['map_id'] ? 'active' : '' ?>"
-       href="<?= url('maps/' . (int) $m['map_id']) ?>"
+       href="<?= isset($tab_url_prefix) ? e($tab_url_prefix . (int) $m['map_id']) : url('maps/' . (int) $m['map_id']) ?>"
        role="tab"><?= e($m['map_name']) ?></a>
   <?php endforeach; ?>
 </div>
@@ -50,12 +50,14 @@ $canBook = \App\Core\Auth::canBook();
         <?php endforeach; ?>
       </svg>
     </div>
+    <?php if (empty($hide_map_stats)): ?>
     <div class="map-stats">
       <div class="map-stat"><strong><?= (int) $counts['total'] ?></strong><span>Total rooms</span></div>
       <div class="map-stat"><strong><?= (int) $counts['busy'] ?></strong><span>Occupied now</span></div>
       <div class="map-stat"><strong><?= (int) $counts['free'] ?></strong><span>Available now</span></div>
       <div class="map-stat"><strong><?= (int) $counts['reserved'] ?></strong><span>Reserved today</span></div>
     </div>
+    <?php endif; ?>
   </div>
 
   <aside>

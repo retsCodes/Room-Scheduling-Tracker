@@ -25,6 +25,7 @@ if ($current === '') {
   <aside class="sidebar">
     <a class="brand" href="<?= url('') ?>"><span class="brand-mark">R</span> Room Scheduling<br>Tracker</a>
     <nav>
+      <a href="<?= url('') ?>" class="<?= $current === 'dashboard' ? 'active' : '' ?>"><span class="nav-icon">🏠</span> Dashboard</a>
       <p class="nav-section">Campus Map</p>
       <a href="<?= url('maps') ?>" class="<?= $current === 'maps' ? 'active' : '' ?>"><span class="nav-icon">🗺️</span> Campus Map</a>
       <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
@@ -33,12 +34,18 @@ if ($current === '') {
       <a href="<?= url('calendar') ?>" class="<?= $current === 'calendar' ? 'active' : '' ?>"><span class="nav-icon">🗓️</span> Calendar</a>
       <a href="<?= url('availability') ?>" class="<?= $current === 'availability' ? 'active' : '' ?>"><span class="nav-icon">🔍</span> Availability</a>
       <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">📌</span> Occurrences</a>
-      <?php if ($isAdmin): ?>
-      <p class="nav-section">Admin</p>
-      <a href="<?= url('users') ?>" class="<?= $current === 'users' ? 'active' : '' ?>"><span class="nav-icon">👥</span> User List</a>
-      <?php endif; ?>
       <p class="nav-section">Account</p>
       <a href="<?= url('profile') ?>" class="<?= $current === 'profile' ? 'active' : '' ?>"><span class="nav-icon">👤</span> My Profile</a>
+      <?php if ($isAdmin): ?>
+        <?php $onAdminPage = ($current === 'users'); ?>
+        <?php if ($onAdminPage): ?>
+        <p class="nav-section">Admin</p>
+        <a href="<?= url('users') ?>" class="active"><span class="nav-icon">👥</span> User List</a>
+        <?php endif; ?>
+        <div class="sidebar-switch">
+          <a class="btn" href="<?= url($onAdminPage ? '' : 'users') ?>"><?= $onAdminPage ? '← Back to user view' : 'Switch to Admin' ?></a>
+        </div>
+      <?php endif; ?>
     </nav>
     <div class="sidebar-foot">
       <span class="user-chip"><?= e(\App\Core\Auth::user()['username'] ?? '') ?> <small><?= e(\App\Core\Auth::role() ?? '') ?><?= \App\Core\Auth::role() === 'officer' ? ' (org officer)' : '' ?></small></span>
@@ -49,10 +56,6 @@ if ($current === '') {
     <header class="topbar">
       <p class="page-title"><?= e($title ?? 'Room Scheduling Tracker') ?></p>
       <div class="top-actions">
-        <?php if ($isAdmin): ?>
-          <?php $onAdminPage = ($current === 'users'); ?>
-          <a class="btn btn-small <?= $onAdminPage ? '' : 'btn-primary' ?>" href="<?= url($onAdminPage ? 'rooms' : 'users') ?>"><?= $onAdminPage ? '← Back to user view' : 'Admin' ?></a>
-        <?php endif; ?>
         <span class="muted"><?= e(date('l, F j, Y')) ?></span>
       </div>
     </header>
