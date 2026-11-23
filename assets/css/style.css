@@ -99,8 +99,7 @@ code { background: var(--blue-50); padding: .1em .35em; border-radius: 6px; font
 }
 .sidebar .nav-section:first-child { margin-top: .2rem; }
 .sidebar .nav-icon { width: 1.25rem; text-align: center; font-size: 1.05rem; }
-.sidebar-switch { padding: .9rem .8rem 0; }
-.sidebar-switch .btn { width: 100%; text-align: center; }
+.sidebar-switch-btn { width: 100%; text-align: center; margin-bottom: .6rem; }
 .sidebar.admin { background: linear-gradient(180deg, #0f172a 0%, #1e293b 85%); }
 .sidebar.admin nav a.active { box-shadow: inset 3px 0 0 var(--amber); }
 .admin-badge { display: inline-block; background: var(--amber); color: #0f172a; font-size: .68rem; font-weight: 800; padding: .15rem .5rem; border-radius: 999px; letter-spacing: .08em; vertical-align: middle; }

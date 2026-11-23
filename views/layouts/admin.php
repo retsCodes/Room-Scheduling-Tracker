@@ -29,14 +29,14 @@ if ($current === '') {
       <a href="<?= url('maps') ?>" class="<?= $current === 'maps' ? 'active' : '' ?>"><span class="nav-icon">🗺️</span> Maps</a>
       <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
       <a href="<?= url('schedules') ?>" class="<?= $current === 'schedules' ? 'active' : '' ?>"><span class="nav-icon">📅</span> Schedules</a>
-      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">🕘</span> History</a>
+      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">🕘</span> Schedule History</a>
       <p class="nav-section">People</p>
       <a href="<?= url('users') ?>" class="<?= $current === 'users' ? 'active' : '' ?>"><span class="nav-icon">👥</span> User List</a>
       <p class="nav-section">Account</p>
       <a href="<?= url('profile') ?>" class="<?= $current === 'profile' ? 'active' : '' ?>"><span class="nav-icon">👤</span> My Profile</a>
     </nav>
     <div class="sidebar-foot">
-      <a class="btn" href="<?= url('') ?>" style="width:100%;text-align:center;margin-bottom:.6rem">← Back to user view</a>
+      <a class="btn sidebar-switch-btn" href="<?= url('') ?>">← Back to user view</a>
       <span class="user-chip"><?= e(\App\Core\Auth::user()['username'] ?? '') ?> <small>admin</small></span>
       <form method="post" action="<?= url('logout') ?>" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost" type="submit">⇦ Log out</button></form>
     </div>

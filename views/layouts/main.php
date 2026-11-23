@@ -33,16 +33,14 @@ if ($current === '') {
       <a href="<?= url('schedules') ?>" class="<?= $current === 'schedules' ? 'active' : '' ?>"><span class="nav-icon">📅</span> Schedules</a>
       <a href="<?= url('calendar') ?>" class="<?= $current === 'calendar' ? 'active' : '' ?>"><span class="nav-icon">🗓️</span> Calendar</a>
       <a href="<?= url('availability') ?>" class="<?= $current === 'availability' ? 'active' : '' ?>"><span class="nav-icon">🔍</span> Availability</a>
-      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">🕘</span> History</a>
+      <a href="<?= url('occurrences') ?>" class="<?= $current === 'occurrences' ? 'active' : '' ?>"><span class="nav-icon">🕘</span> Schedule History</a>
       <p class="nav-section">Account</p>
       <a href="<?= url('profile') ?>" class="<?= $current === 'profile' ? 'active' : '' ?>"><span class="nav-icon">👤</span> My Profile</a>
-      <?php if ($isAdmin): ?>
-        <div class="sidebar-switch">
-          <a class="btn" href="<?= url('admin') ?>">Switch to Admin</a>
-        </div>
-      <?php endif; ?>
     </nav>
     <div class="sidebar-foot">
+      <?php if ($isAdmin): ?>
+        <a class="btn sidebar-switch-btn" href="<?= url('admin') ?>">Switch to Admin →</a>
+      <?php endif; ?>
       <span class="user-chip"><?= e(\App\Core\Auth::user()['username'] ?? '') ?> <small><?= e(\App\Core\Auth::role() ?? '') ?><?= \App\Core\Auth::role() === 'officer' ? ' (org officer)' : '' ?></small></span>
       <form method="post" action="<?= url('logout') ?>" class="inline-form"><?= csrf_field() ?><button class="btn btn-ghost" type="submit">⇦ Log out</button></form>
     </div>

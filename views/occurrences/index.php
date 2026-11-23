@@ -1,5 +1,5 @@
-<h1>History</h1>
-<p class="muted">Every booking, past and present - including cancelled and completed ones.</p>
+<h1>Schedule History</h1>
+<p class="muted">All schedule history - every booking, past and present, including cancelled and completed ones.</p>
 <form method="get" action="<?= url('occurrences') ?>" class="card form">
   <div class="grid-2">
     <label>From <input type="date" name="from" value="<?= e($from) ?>"></label>
@@ -7,7 +7,7 @@
   </div>
   <button class="btn btn-primary" type="submit">Show</button>
 </form>
-<?php if (empty($occurrences)): ?><p class="muted">No bookings in this range.</p>
+<?php if (empty($occurrences)): ?><p class="muted"><?= ($from === '' && $to === '') ? 'No bookings yet.' : 'No bookings in this range.' ?></p>
 <?php else: ?>
 <table class="table card">
   <thead><tr><th class="nowrap">Date</th><th class="nowrap">Time</th><th>Schedule</th><th class="nowrap">Room</th><th>Organizer</th><th>Status</th></tr></thead>

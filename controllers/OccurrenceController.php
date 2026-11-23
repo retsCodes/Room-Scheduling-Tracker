@@ -13,13 +13,13 @@ final class OccurrenceController
     public function index(): void
     {
         Auth::requireLogin();
-        $from = $_GET['from'] ?? date('Y-m-d');
-        $to = $_GET['to'] ?? date('Y-m-d', strtotime('+30 days'));
+        $from = trim((string) ($_GET['from'] ?? ''));
+        $to = trim((string) ($_GET['to'] ?? ''));
         $roomId = isset($_GET['room_id']) && $_GET['room_id'] !== '' ? (int) $_GET['room_id'] : null;
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = date('Y-m-d');
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = date('Y-m-d', strtotime('+30 days'));
+        if ($from !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = '';
+        if ($to !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = '';
         view('occurrences/index', [
-            'title' => 'History',
+            'title' => 'Schedule History',
             'occurrences' => $this->occurrences->forDateRange($from, $to, $roomId),
             'from' => $from, 'to' => $to, 'room_id' => $roomId,
         ]);

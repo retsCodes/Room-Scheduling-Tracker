@@ -39,7 +39,7 @@
       <td class="nowrap"><?= e($s['start_date']) ?><?= $s['end_date'] ? ' → ' . e($s['end_date']) : '' ?></td>
       <td class="nowrap"><?= time_12h($s['start_time']) ?>–<?= time_12h($s['end_time']) ?></td>
       <td><?= e($s['organizer_name']) ?></td>
-      <td><?= status_badge($s['schedule_status']) ?></td>
+      <td><?= !empty($s['is_finished']) ? '<span class="badge badge-grey">Finished</span>' : status_badge($s['schedule_status']) ?></td>
       <td><?= confirm_badge($s['admin_confirmed'] ?? 0) ?></td>
     </tr>
   <?php endforeach; ?>

@@ -6,7 +6,6 @@
   <div>
     <?php if (\App\Core\Auth::isAdmin()): ?>
       <a class="btn" href="<?= url('maps/' . (int) $map['map_id'] . '/editor') ?>">✏️ Edit map layout</a>
-      <a class="btn" href="<?= url('rooms/create?map_id=' . (int) $map['map_id']) ?>">+ Add room</a>
       <a class="btn" href="<?= url('maps/' . (int) $map['map_id'] . '/edit') ?>">Edit map</a>
     <?php endif; ?>
   </div>

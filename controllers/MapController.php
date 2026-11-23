@@ -19,7 +19,15 @@ final class MapController
     public function index(): void
     {
         Auth::requireLogin();
-        view('maps/index', ['title' => 'Floor maps', 'maps' => $this->maps->all()]);
+        $maps = $this->maps->all(true);
+        if (empty($maps)) {
+            if (Auth::isAdmin()) {
+                flash('success', 'Create your first floor map.');
+                redirect('maps/create');
+            }
+            redirect('');
+        }
+        redirect('maps/' . (int) $maps[0]['map_id']);
     }
 
     

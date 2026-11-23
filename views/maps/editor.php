@@ -21,6 +21,8 @@ foreach ($rooms as $r) {
     <p class="muted">Map editor - drag rooms to move them, drag the white corner dot to resize.</p>
   </div>
   <div>
+    <a class="btn" href="<?= url('maps/' . (int) $map['map_id'] . '/edit') ?>">Map info</a>
+    <a class="btn btn-primary" href="<?= url('rooms/create?map_id=' . (int) $map['map_id']) ?>">+ Add room</a>
     <a class="btn" href="<?= url('maps/' . (int) $map['map_id'] . '/export') ?>">EXPORT</a>
     <form method="post" action="<?= url('maps/' . (int) $map['map_id'] . '/import') ?>" enctype="multipart/form-data" class="inline-form">
       <?= csrf_field() ?>

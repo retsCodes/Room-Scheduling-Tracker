@@ -5,7 +5,6 @@
     <p class="muted">Manage maps, rooms, schedules and users.</p>
   </div>
   <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-    <a class="btn" href="<?= url('maps/create') ?>">+ New map</a>
     <a class="btn" href="<?= url('rooms/create') ?>">+ New room</a>
     <a class="btn btn-primary" href="<?= url('schedules/create') ?>">+ New schedule</a>
   </div>

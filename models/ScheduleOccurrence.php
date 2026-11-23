@@ -28,6 +28,8 @@ final class ScheduleOccurrence
     
     public function forDateRange(string $from, string $to, ?int $roomId = null): array
     {
+        if ($from === '') $from = '0000-01-01';
+        if ($to === '') $to = '9999-12-31';
         $sql = 'SELECT o.*, s.schedule_title, s.schedule_description, s.organizer_id, s.admin_confirmed,
                        r.room_name, m.map_name, u.username AS organizer_name
                 FROM tblScheduleOccurrences o

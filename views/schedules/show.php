@@ -15,7 +15,7 @@
   <p><strong>Recurrence:</strong> <?= e(recurrence_label($schedule['recurrence_type'])) ?><?php if (!empty($schedule['days'])): ?> - <?= implode(', ', array_map(fn($d) => date('l', strtotime('2026-11-0' . ($d + 1))), $schedule['days'])) ?><?php endif; ?></p>
   <p><strong>Dates:</strong> <?= e($schedule['start_date']) ?><?= $schedule['end_date'] ? ' → ' . e($schedule['end_date']) : '' ?></p>
   <p><strong>Time:</strong> <?= time_12h($schedule['start_time']) ?>–<?= time_12h($schedule['end_time']) ?></p>
-  <p><strong>Status:</strong> <?= status_badge($schedule['schedule_status']) ?></p>
+  <p><strong>Status:</strong> <?= status_badge($schedule['schedule_status']) ?><?= !empty($schedule['is_finished']) ? ' <span class="badge badge-grey">Finished</span>' : '' ?></p>
   <p><strong>Admin confirmation:</strong> <?= confirm_badge($schedule['admin_confirmed'] ?? 0) ?>
     <?php if (\App\Core\Auth::isAdmin() && $schedule['schedule_status'] === 'active'): ?>
     <form method="post" action="<?= url('schedules/' . (int) $schedule['schedule_id'] . '/confirm') ?>" class="inline-form"><?= csrf_field() ?><input type="hidden" name="confirmed" value="<?= (int) ($schedule['admin_confirmed'] ?? 0) === 1 ? '0' : '1' ?>"><button class="btn btn-small" type="submit"><?= (int) ($schedule['admin_confirmed'] ?? 0) === 1 ? 'Remove confirmation' : '✓ Confirm this schedule' ?></button></form>

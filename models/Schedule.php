@@ -13,16 +13,23 @@ final class Schedule
 
     public function __construct(private Database $db) {}
 
+    private static function lastDateExpr(): string
+    {
+        return "COALESCE(s.end_date, CASE WHEN s.recurrence_type = 'one_time' THEN s.start_date END)";
+    }
+
     public function find(int $id): ?array
     {
+        $lastDate = self::lastDateExpr();
         $row = $this->db->one(
-            'SELECT s.*, r.room_name, m.map_name, u.username AS organizer_name
+            'SELECT s.*, r.room_name, m.map_name, u.username AS organizer_name,
+                    CASE WHEN ' . $lastDate . ' IS NOT NULL AND ' . $lastDate . ' < ? THEN 1 ELSE 0 END AS is_finished
              FROM tblSchedules s
              JOIN tblRooms r ON r.room_id = s.room_id
              JOIN tblMaps m ON m.map_id = r.map_id
              JOIN tblUsers u ON u.user_id = s.organizer_id
              WHERE s.schedule_id = ?',
-            [$id]
+            [date('Y-m-d'), $id]
         );
         if ($row) {
             $row['days'] = $this->days($id);
@@ -33,23 +40,33 @@ final class Schedule
     
     public function all(array $filters = []): array
     {
-        $sql = 'SELECT s.*, r.room_name, m.map_name, u.username AS organizer_name
+        $lastDate = self::lastDateExpr();
+        $today = date('Y-m-d');
+        $sql = 'SELECT s.*, r.room_name, m.map_name, u.username AS organizer_name,
+                       CASE WHEN ' . $lastDate . ' IS NOT NULL AND ' . $lastDate . ' < ? THEN 1 ELSE 0 END AS is_finished
                 FROM tblSchedules s
                 JOIN tblRooms r ON r.room_id = s.room_id
                 JOIN tblMaps m ON m.map_id = r.map_id
                 JOIN tblUsers u ON u.user_id = s.organizer_id';
-        $params = [];
+        $params = [$today];
         $where = [];
         if (!empty($filters['room_id'])) {
             $where[] = 's.room_id = ?';
             $params[] = (int) $filters['room_id'];
         }
         if (!empty($filters['status'])) {
-            $where[] = 's.schedule_status = ?';
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'active') {
+                $where[] = "s.schedule_status = ? AND ($lastDate IS NULL OR $lastDate >= ?)";
+                $params[] = 'active';
+                $params[] = $today;
+            } else {
+                $where[] = 's.schedule_status = ?';
+                $params[] = $filters['status'];
+            }
         }
         if (!empty($filters['unconfirmed'])) {
-            $where[] = "s.admin_confirmed = 0 AND s.schedule_status = 'active'";
+            $where[] = "s.admin_confirmed = 0 AND s.schedule_status = 'active' AND ($lastDate IS NULL OR $lastDate >= ?)";
+            $params[] = $today;
         }
         if (!empty($filters['organizer_id'])) {
             $where[] = 's.organizer_id = ?';
