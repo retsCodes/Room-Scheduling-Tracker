@@ -52,7 +52,7 @@ final class MapController
     public function create(): void
     {
         Auth::requireAdmin();
-        view('maps/form', ['title' => 'New floor map', 'map' => null]);
+        view('maps/form', ['title' => 'New floor map', 'map' => null, 'layout' => 'admin']);
     }
 
     public function store(): void
@@ -95,6 +95,7 @@ final class MapController
             'rooms' => $this->rooms->all($id), 'busy' => $busyIds,
             'today' => $today,
             'extra_js' => 'assets/js/map-editor.js',
+            'layout' => 'admin',
         ]);
     }
 
@@ -120,6 +121,10 @@ final class MapController
             http_response_code(400);
             echo json_encode(['ok' => false, 'error' => 'Bad layout data.']);
             return;
+        }
+        $decorations = json_decode((string) ($_POST['decorations'] ?? '[]'), true);
+        if (is_array($decorations)) {
+            $this->maps->updateDecorations($id, json_encode($decorations));
         }
         $saved = 0; $created = 0;
         foreach ($layout as $r) {
@@ -174,6 +179,11 @@ final class MapController
         if (!is_array($rooms)) {
             flash('error', 'That file is not a valid map JSON export.');
             redirect('maps/' . $id . '/editor');
+        }
+        if (isset($data['map']['decorations'])) {
+            $dec = $data['map']['decorations'];
+            if (is_string($dec)) $dec = json_decode($dec, true);
+            if (is_array($dec)) $this->maps->updateDecorations($id, json_encode($dec));
         }
         $existing = $this->rooms->all($id);
         $byId = [];
@@ -240,7 +250,7 @@ final class MapController
             flash('error', 'Map not found.');
             redirect('maps');
         }
-        view('maps/form', ['title' => 'Edit map', 'map' => $map]);
+        view('maps/form', ['title' => 'Edit map', 'map' => $map, 'layout' => 'admin']);
     }
 
     public function update(int $id): void

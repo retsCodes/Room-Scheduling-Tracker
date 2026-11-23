@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Map;
 use App\Models\Room;
 
 $todayByRoom = [];
@@ -34,6 +35,7 @@ $canBook = \App\Core\Auth::canBook();
     <div class="map-canvas card" style="margin-bottom:0">
       <span class="map-title">📍 <?= e($map['map_name']) ?> · Floor <?= (int) $map['floor_number'] ?></span>
       <svg viewBox="0 0 <?= (int) $map['map_width'] ?> <?= (int) $map['map_height'] ?>" role="img" aria-label="Floor map of <?= e($map['map_name']) ?>">
+        <?= Map::decorationsToSvg(json_decode((string) ($map['decorations'] ?? ''), true) ?: []) ?>
         <?php foreach ($rooms as $r):
           $rid = (int) $r['room_id'];
           if (($r['room_status'] ?? 'active') !== 'active') { $status = 'unavailable'; $fill = '#e2e8f0'; $stroke = '#94a3b8'; }

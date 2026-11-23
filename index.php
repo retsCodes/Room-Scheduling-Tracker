@@ -35,6 +35,7 @@ spl_autoload_register(function (string $class): void {
     }
 });
 
+use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\AvailabilityController;
 use App\Core\Auth;
@@ -70,7 +71,13 @@ function view(string $name, array $data = []): void
     ob_start();
     require $viewFile;
     $content = ob_get_clean();
-    require __DIR__ . '/views/layouts/main.php';
+    $layout = $data['layout'] ?? null;
+    if ($layout === 'admin' && Auth::isAdmin()) {
+        $_SESSION['admin_mode'] = 1;
+    }
+    $useAdminLayout = $layout === 'admin'
+        || (!empty($_SESSION['admin_mode']) && Auth::isAdmin());
+    require __DIR__ . '/views/layouts/' . ($useAdminLayout ? 'admin' : 'main') . '.php';
 }
 
 
@@ -85,6 +92,7 @@ $recurrence  = new RecurrenceService($occurrences, $exceptions);
 $availability = new AvailabilityService($occurrences, $rooms);
 
 $auth        = new AuthController($users);
+$adminCtl    = new AdminController($users, $rooms, $maps, $schedules, $occurrences, $availability);
 $dashboard   = new DashboardController($db, $occurrences, $schedules, $rooms, $maps, $availability);
 $mapCtl      = new MapController($maps, $rooms, $occurrences);
 $roomCtl     = new RoomController($rooms, $maps, $occurrences);
@@ -136,10 +144,13 @@ $segments = $path === '' ? [] : explode('/', $path);
 try {
     if ($path === '') {
         if (Auth::check()) {
+            unset($_SESSION['admin_mode']);
             $dashboard->index();
         } else {
             redirect('login');
         }
+    } elseif ($path === 'admin' && !$isPost) {
+        $adminCtl->index();
     } elseif ($path === 'login' && !$isPost) {
         $auth->showLogin();
     } elseif ($path === 'login' && $isPost) {

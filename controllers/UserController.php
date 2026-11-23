@@ -13,7 +13,7 @@ final class UserController
     public function index(): void
     {
         Auth::requireAdmin();
-        view('users/index', ['title' => 'Users', 'users' => $this->users->all()]);
+        view('users/index', ['title' => 'Users', 'users' => $this->users->all(), 'layout' => 'admin']);
     }
 
     public function edit(int $id): void
@@ -24,7 +24,7 @@ final class UserController
             flash('error', 'User not found.');
             redirect('users');
         }
-        view('users/form', ['title' => 'Edit user', 'user' => $user]);
+        view('users/form', ['title' => 'Edit user', 'user' => $user, 'layout' => 'admin']);
     }
 
     public function update(int $id): void

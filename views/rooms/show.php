@@ -25,6 +25,14 @@ $heroBadge = [
 <div class="grid-2">
   <section class="card">
     <h2>About this room</h2>
+    <?php if (!empty($room['room_image'])): ?>
+      <img class="room-photo" src="<?= url('uploads/rooms/' . e($room['room_image'])) ?>" alt="Photo of <?= e($room['room_name']) ?>">
+    <?php elseif (\App\Core\Auth::isAdmin()): ?>
+      <div class="photo-placeholder">
+        <p class="muted" style="margin:0">🖼️ No photo yet</p>
+        <p style="margin:.4rem 0 0"><a href="<?= url('rooms/' . (int) $room['room_id'] . '/edit') ?>">Add a photo of this room →</a></p>
+      </div>
+    <?php endif; ?>
     <p><strong>Floor map:</strong> <?= e($room['map_name']) ?></p>
     <p><strong>Shape:</strong> <?= e($room['shape_type']) ?></p>
     <p><strong>Status:</strong> <?= status_badge($room['room_status']) ?></p>
@@ -66,31 +74,30 @@ $heroBadge = [
     ?>
     <?php if (empty($today_occ)): ?>
       <p class="muted">Nothing booked today - this room is free all day.</p>
-    <?php else: ?>
-      <div class="tl-controls">
-        <div class="tl-presets">
-          <button type="button" class="btn btn-small tl-preset" data-preset="all">All day</button>
-          <button type="button" class="btn btn-small tl-preset" data-preset="morning">Morning</button>
-          <button type="button" class="btn btn-small tl-preset" data-preset="afternoon">Afternoon</button>
-          <button type="button" class="btn btn-small tl-preset" data-preset="evening">Evening</button>
-        </div>
-        <div class="tl-zoom">
-          <button type="button" class="btn btn-small" id="tl-zoom-out" title="Zoom out">−</button>
-          <button type="button" class="btn btn-small" id="tl-zoom-in" title="Zoom in">+</button>
-          <button type="button" class="btn btn-small" id="tl-reset">Reset</button>
-        </div>
-      </div>
-      <p class="muted tl-range" id="tl-range"></p>
-      <div class="timeline" id="timeline">
-        <div class="tl-grid" id="tl-grid"></div>
-        <div class="tl-lanes" id="tl-lanes"></div>
-        <div class="tl-now" id="tl-now" style="display:none" title="Now"></div>
-        <div class="tl-select" id="tl-select" style="display:none"></div>
-      </div>
-      <div class="timeline-scale" id="tl-scale"></div>
-      <p class="muted" style="margin-top:.6rem"><span class="badge badge-blue">Booked</span> <span class="badge badge-red">Cancelled</span> <span class="badge badge-green">Completed</span> <span class="muted">Drag across the timeline to zoom into those hours. A gold outline means an admin confirmed it.</span></p>
-      <script type="application/json" id="timeline-data"><?= json_encode($tlData, $jsonFlags) ?></script>
     <?php endif; ?>
+    <div class="tl-controls">
+      <div class="tl-presets">
+        <button type="button" class="btn btn-small tl-preset" data-preset="all">All day</button>
+        <button type="button" class="btn btn-small tl-preset" data-preset="morning">Morning</button>
+        <button type="button" class="btn btn-small tl-preset" data-preset="afternoon">Afternoon</button>
+        <button type="button" class="btn btn-small tl-preset" data-preset="evening">Evening</button>
+      </div>
+      <div class="tl-zoom">
+        <button type="button" class="btn btn-small" id="tl-zoom-out" title="Zoom out">−</button>
+        <button type="button" class="btn btn-small" id="tl-zoom-in" title="Zoom in">+</button>
+        <button type="button" class="btn btn-small" id="tl-reset">Reset</button>
+      </div>
+    </div>
+    <p class="muted tl-range" id="tl-range"></p>
+    <div class="timeline" id="timeline">
+      <div class="tl-grid" id="tl-grid"></div>
+      <div class="tl-lanes" id="tl-lanes"></div>
+      <div class="tl-now" id="tl-now" style="display:none" title="Now"></div>
+      <div class="tl-select" id="tl-select" style="display:none"></div>
+    </div>
+    <div class="timeline-scale" id="tl-scale"></div>
+    <p class="muted" style="margin-top:.6rem"><span class="badge badge-blue">Booked</span> <span class="badge badge-red">Cancelled</span> <span class="badge badge-green">Completed</span> <span class="muted">Drag across the timeline to zoom into those hours. A gold outline means an admin confirmed it.</span></p>
+    <script type="application/json" id="timeline-data"><?= json_encode($tlData, $jsonFlags) ?></script>
   </section>
 </div>
 

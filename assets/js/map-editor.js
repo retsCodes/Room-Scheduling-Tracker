@@ -15,9 +15,17 @@
   var tempId = -1;
   var unsaved = false;
 
+  var decosEl = document.getElementById('editor-decorations');
+  var decorations = [];
+  try { decorations = JSON.parse(decosEl ? decosEl.textContent || '[]' : '[]'); } catch (e) {}
+  if (!Array.isArray(decorations)) decorations = [];
+  var originalDecorations = JSON.parse(JSON.stringify(decorations));
+  var selectedDeco = null;
+
   var statusEl = document.getElementById('editor-status');
   var unsavedDot = document.getElementById('unsaved-dot');
   var propsForm = document.getElementById('props-form');
+  var decoForm = document.getElementById('deco-form');
   var propsEmpty = document.getElementById('props-empty');
 
   function esc(s) {
@@ -67,8 +75,58 @@
     }
     return html + '</g>';
   }
+  function decoGroupHtml(d, i) {
+    var sel = selectedDeco === i ? ' selected' : '';
+    if ((d.type || 'box') === 'text') {
+      return '<g class="editor-deco' + sel + '" data-deco="' + i + '">'
+        + '<text x="' + (+d.x || 0) + '" y="' + (+d.y || 0) + '" font-size="' + Math.max(10, +d.size || 20) + '" fill="' + esc(d.color || '#64748b') + '" font-weight="600" text-anchor="middle">' + esc(d.text || '') + '</text>'
+        + '</g>';
+    }
+    var x = +d.x || 0, y = +d.y || 0, w = Math.max(10, +d.width || 160), h = Math.max(10, +d.height || 100);
+    var html = '<g class="editor-deco' + sel + '" data-deco="' + i + '">'
+      + '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" fill="' + esc(d.fill || '#e2e8f0') + '" stroke="' + esc(d.fill || '#e2e8f0') + '" stroke-width="1" />';
+    var label = (d.label || '').trim();
+    if (label) {
+      html += '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 5) + '" font-size="14" fill="#475569" font-weight="600" text-anchor="middle">' + esc(label) + '</text>';
+    }
+    html += '<circle class="editor-deco-handle" data-deco="' + i + '" cx="' + (x + w) + '" cy="' + (y + h) + '" r="9" />';
+    return html + '</g>';
+  }
+  function updateDecoDom(d, i) {
+    var g = svg.querySelector('g[data-deco="' + i + '"]');
+    if (!g) { renderAll(); return; }
+    if ((d.type || 'box') === 'text') {
+      var t = g.querySelector('text');
+      if (t) {
+        t.setAttribute('x', +d.x || 0); t.setAttribute('y', +d.y || 0);
+        t.setAttribute('font-size', Math.max(10, +d.size || 20));
+        t.setAttribute('fill', d.color || '#64748b');
+        t.textContent = d.text || '';
+      }
+      return;
+    }
+    var x = +d.x || 0, y = +d.y || 0, w = Math.max(10, +d.width || 160), h = Math.max(10, +d.height || 100);
+    var rect = g.querySelector('rect');
+    if (rect) {
+      rect.setAttribute('x', x); rect.setAttribute('y', y);
+      rect.setAttribute('width', w); rect.setAttribute('height', h);
+      rect.setAttribute('fill', d.fill || '#e2e8f0');
+      rect.setAttribute('stroke', d.fill || '#e2e8f0');
+    }
+    var labelEl = g.querySelector('text');
+    var label = (d.label || '').trim();
+    if (label) {
+      if (!labelEl) { renderAll(); return; }
+      labelEl.setAttribute('x', x + w / 2); labelEl.setAttribute('y', y + h / 2 + 5);
+      labelEl.textContent = label;
+    } else if (labelEl) {
+      renderAll(); return;
+    }
+    var handle = g.querySelector('.editor-deco-handle');
+    if (handle) { handle.setAttribute('cx', x + w); handle.setAttribute('cy', y + h); }
+  }
   function renderAll() {
-    svg.innerHTML = rooms.map(roomGroupHtml).join('');
+    svg.innerHTML = decorations.map(decoGroupHtml).join('') + rooms.map(roomGroupHtml).join('');
   }
   function findRoom(id) { return rooms.filter(function (r) { return r.room_id === id; })[0]; }
   function groupFor(id) { return svg.querySelector('g[data-room-id="' + id + '"]'); }
@@ -159,9 +217,13 @@
   
   function select(id) {
     selectedId = id;
+    selectedDeco = null;
     svg.querySelectorAll('.editor-room').forEach(function (g) {
       g.classList.toggle('selected', +g.getAttribute('data-room-id') === id);
     });
+    svg.querySelectorAll('.editor-deco').forEach(function (g) { g.classList.remove('selected'); });
+    decoForm.style.display = 'none';
+    document.getElementById('props-title').textContent = 'Room Properties';
     var r = findRoom(id);
     if (!r) { propsForm.style.display = 'none'; propsEmpty.style.display = ''; return; }
     propsEmpty.style.display = 'none';
@@ -201,6 +263,64 @@
     document.getElementById('prop-w').value = Math.round(b.w);
     document.getElementById('prop-h').value = Math.round(b.h);
   }
+  function selectDeco(i) {
+    selectedDeco = i;
+    selectedId = null;
+    svg.querySelectorAll('.editor-room').forEach(function (g) { g.classList.remove('selected'); });
+    svg.querySelectorAll('.editor-deco').forEach(function (g) {
+      g.classList.toggle('selected', +g.getAttribute('data-deco') === i);
+    });
+    var d = decorations[i];
+    if (!d) { decoForm.style.display = 'none'; propsEmpty.style.display = ''; return; }
+    propsEmpty.style.display = 'none';
+    propsForm.style.display = 'none';
+    decoForm.style.display = '';
+    document.getElementById('props-title').textContent = 'Decoration Properties';
+    var isText = (d.type || 'box') === 'text';
+    document.getElementById('deco-type-label').textContent = isText ? 'Text label' : 'Coloured box';
+    document.getElementById('deco-size-row').style.display = isText ? 'none' : '';
+    document.getElementById('deco-box-fields').style.display = isText ? 'none' : '';
+    document.getElementById('deco-text-fields').style.display = isText ? '' : 'none';
+    document.getElementById('deco-x').value = Math.round(+d.x || 0);
+    document.getElementById('deco-y').value = Math.round(+d.y || 0);
+    document.getElementById('deco-w').value = Math.round(+d.width || 160);
+    document.getElementById('deco-h').value = Math.round(+d.height || 100);
+    document.getElementById('deco-fill').value = d.fill || '#e2e8f0';
+    document.getElementById('deco-label').value = d.label || '';
+    document.getElementById('deco-text').value = d.text || '';
+    document.getElementById('deco-size').value = +d.size || 20;
+    document.getElementById('deco-color').value = d.color || '#64748b';
+  }
+  function bindDeco(id, fn) {
+    document.getElementById(id).addEventListener('input', function (e) {
+      var d = decorations[selectedDeco];
+      if (!d) return;
+      fn(d, e.target.value);
+      updateDecoDom(d, selectedDeco);
+      markUnsaved();
+    });
+  }
+  bindDeco('deco-x', function (d, v) { d.x = Math.max(0, +v || 0); });
+  bindDeco('deco-y', function (d, v) { d.y = Math.max(0, +v || 0); });
+  bindDeco('deco-w', function (d, v) { d.width = Math.max(10, +v || 10); });
+  bindDeco('deco-h', function (d, v) { d.height = Math.max(10, +v || 10); });
+  bindDeco('deco-fill', function (d, v) { d.fill = v; });
+  bindDeco('deco-label', function (d, v) { d.label = v; });
+  bindDeco('deco-text', function (d, v) { d.text = v; });
+  bindDeco('deco-size', function (d, v) { d.size = Math.max(10, Math.min(72, +v || 20)); });
+  bindDeco('deco-color', function (d, v) { d.color = v; });
+  document.getElementById('delete-deco').addEventListener('click', function () {
+    var d = decorations[selectedDeco];
+    if (!d) return;
+    window.showConfirm('Delete this decoration?', function () {
+      decorations.splice(selectedDeco, 1);
+      selectedDeco = null;
+      decoForm.style.display = 'none'; propsEmpty.style.display = '';
+      document.getElementById('props-title').textContent = 'Room Properties';
+      renderAll();
+      markUnsaved();
+    });
+  });
   function bindProp(id, fn) {
     document.getElementById(id).addEventListener('input', function (e) {
       var r = findRoom(selectedId);
@@ -292,11 +412,14 @@
     if (!unsaved) return;
     window.showConfirm('Discard all unsaved changes?', function () {
       rooms = JSON.parse(JSON.stringify(originalRooms));
+      decorations = JSON.parse(JSON.stringify(originalDecorations));
       deleted = [];
       selectedId = null;
+      selectedDeco = null;
       setUnsaved(false);
       statusEl.textContent = 'All changes saved.';
-      propsForm.style.display = 'none'; propsEmpty.style.display = '';
+      propsForm.style.display = 'none'; decoForm.style.display = 'none'; propsEmpty.style.display = '';
+      document.getElementById('props-title').textContent = 'Room Properties';
       document.getElementById('prop-name').value = '';
       document.getElementById('prop-desc').value = '';
       document.getElementById('prop-status').value = 'active';
@@ -313,13 +436,19 @@
   var tool = 'select';
   var toolSelectBtn = document.getElementById('tool-select');
   var toolAddBtn = document.getElementById('tool-add');
+  var toolBoxBtn = document.getElementById('tool-box');
+  var toolTextBtn = document.getElementById('tool-text');
   function setTool(t) {
     tool = t;
     if (toolSelectBtn) toolSelectBtn.classList.toggle('active', t === 'select');
     if (toolAddBtn) toolAddBtn.classList.toggle('active', t === 'add');
+    if (toolBoxBtn) toolBoxBtn.classList.toggle('active', t === 'box');
+    if (toolTextBtn) toolTextBtn.classList.toggle('active', t === 'text');
   }
   if (toolSelectBtn) toolSelectBtn.addEventListener('click', function () { setTool('select'); });
   if (toolAddBtn) toolAddBtn.addEventListener('click', function () { setTool('add'); });
+  if (toolBoxBtn) toolBoxBtn.addEventListener('click', function () { setTool('box'); });
+  if (toolTextBtn) toolTextBtn.addEventListener('click', function () { setTool('text'); });
 
   var zoom = 1;
   function applyZoom() {
@@ -349,6 +478,19 @@
     markUnsaved();
   }
 
+  function addDecoAt(p, type) {
+    var d;
+    if (type === 'text') {
+      d = { type: 'text', x: Math.max(0, snap(p.x)), y: Math.max(0, snap(p.y)), text: 'New label', size: 20, color: '#64748b' };
+    } else {
+      d = { type: 'box', x: Math.max(0, snap(p.x - 80)), y: Math.max(0, snap(p.y - 50)), width: 160, height: 100, fill: '#e2e8f0', label: '' };
+    }
+    decorations.push(d);
+    renderAll();
+    selectDeco(decorations.length - 1);
+    markUnsaved();
+  }
+
   
   function svgPoint(evt) {
     var pt = svg.createSVGPoint();
@@ -361,6 +503,36 @@
     if (tool === 'add' && e.target === svg) {
       addRoomAt(svgPoint(e));
       setTool('select');
+      e.preventDefault();
+      return;
+    }
+    if ((tool === 'box' || tool === 'text') && e.target === svg) {
+      addDecoAt(svgPoint(e), tool);
+      setTool('select');
+      e.preventDefault();
+      return;
+    }
+    if (tool === 'select' && e.target === svg) {
+      selectedId = null; selectedDeco = null;
+      propsForm.style.display = 'none'; decoForm.style.display = 'none'; propsEmpty.style.display = '';
+      document.getElementById('props-title').textContent = 'Room Properties';
+      svg.querySelectorAll('.selected').forEach(function (g) { g.classList.remove('selected'); });
+      return;
+    }
+    var decoHandle = e.target.closest ? e.target.closest('.editor-deco-handle') : null;
+    var decoGroup = e.target.closest ? e.target.closest('.editor-deco') : null;
+    if (decoGroup) {
+      var di = +decoGroup.getAttribute('data-deco');
+      var dd = decorations[di];
+      if (!dd) return;
+      selectDeco(di);
+      var pp = svgPoint(e);
+      drag = {
+        id: -1, deco: di, mode: decoHandle ? 'deco-resize' : 'deco-move',
+        startX: pp.x, startY: pp.y,
+        orig: JSON.parse(JSON.stringify(dd)),
+      };
+      svg.setPointerCapture(e.pointerId);
       e.preventDefault();
       return;
     }
@@ -386,11 +558,31 @@
   });
   svg.addEventListener('pointermove', function (e) {
     if (!drag) return;
-    var r = findRoom(drag.id);
-    if (!r) return;
     var p = svgPoint(e);
     var dx = snap(p.x - drag.startX);
     var dy = snap(p.y - drag.startY);
+    if (drag.deco != null) {
+      var dd = decorations[drag.deco];
+      if (!dd) return;
+      if (drag.mode === 'deco-resize') {
+        dd.width = Math.max(10, (+drag.orig.width || 160) + dx);
+        dd.height = Math.max(10, (+drag.orig.height || 100) + dy);
+      } else {
+        dd.x = Math.max(0, (+drag.orig.x || 0) + dx);
+        dd.y = Math.max(0, (+drag.orig.y || 0) + dy);
+      }
+      updateDecoDom(dd, drag.deco);
+      document.getElementById('deco-x').value = Math.round(+dd.x || 0);
+      document.getElementById('deco-y').value = Math.round(+dd.y || 0);
+      if (drag.mode === 'deco-resize') {
+        document.getElementById('deco-w').value = Math.round(+dd.width || 160);
+        document.getElementById('deco-h').value = Math.round(+dd.height || 100);
+      }
+      markUnsaved();
+      return;
+    }
+    var r = findRoom(drag.id);
+    if (!r) return;
     var d = r.shape_data || {};
     if (drag.mode === 'vertex') {
       var pts = d.points || [];
@@ -436,6 +628,7 @@
     var fd = new FormData();
     fd.append('_csrf', meta.csrf || '');
     fd.append('layout', JSON.stringify(rooms));
+    fd.append('decorations', JSON.stringify(decorations));
     fd.append('deleted', JSON.stringify(deleted));
     statusEl.textContent = 'Saving…';
     fetch(meta.saveUrl, { method: 'POST', body: fd })

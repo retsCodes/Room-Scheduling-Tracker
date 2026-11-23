@@ -10,6 +10,9 @@ use App\Models\ScheduleOccurrence;
 
 final class RoomController
 {
+    private const ROOM_IMAGE_TYPES = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+    private const ROOM_IMAGE_DIR = 'uploads/rooms';
+
     public function __construct(
         private Room $rooms,
         private Map $maps,
@@ -133,6 +136,7 @@ final class RoomController
         view('rooms/form', [
             'title' => 'New room', 'room' => null, 'maps' => $this->maps->all(true),
             'prefill_map' => isset($_GET['map_id']) ? (int) $_GET['map_id'] : null,
+            'layout' => 'admin',
         ]);
     }
 
@@ -144,12 +148,16 @@ final class RoomController
             redirect('rooms');
         }
         $data = $this->formData();
-        $error = $this->validate($data);
+        $error = $this->validate($data) ?? $this->imageError();
         if ($error) {
             flash('error', $error);
             redirect('rooms/create');
         }
         $id = $this->rooms->create($data);
+        $image = $this->saveImage($id, null);
+        if ($image !== null) {
+            $this->rooms->update($id, array_merge($data, ['room_image' => $image]));
+        }
         flash('success', 'Room created.');
         redirect('rooms/' . $id);
     }
@@ -162,7 +170,7 @@ final class RoomController
             flash('error', 'Room not found.');
             redirect('rooms');
         }
-        view('rooms/form', ['title' => 'Edit room', 'room' => $room, 'maps' => $this->maps->all(true), 'prefill_map' => null]);
+        view('rooms/form', ['title' => 'Edit room', 'room' => $room, 'maps' => $this->maps->all(true), 'prefill_map' => null, 'layout' => 'admin']);
     }
 
     public function update(int $id): void
@@ -172,15 +180,65 @@ final class RoomController
             flash('error', 'Invalid request.');
             redirect('rooms');
         }
+        $room = $this->rooms->find($id);
+        if ($room === null) {
+            flash('error', 'Room not found.');
+            redirect('rooms');
+        }
         $data = $this->formData();
-        $error = $this->validate($data);
+        $error = $this->validate($data) ?? $this->imageError();
         if ($error) {
             flash('error', $error);
             redirect('rooms/' . $id . '/edit');
         }
+        if (!empty($_POST['remove_image'])) {
+            $this->removeImage($room['room_image'] ?? null);
+            $data['room_image'] = null;
+        } else {
+            $image = $this->saveImage($id, $room['room_image'] ?? null);
+            if ($image !== null && $image !== ($room['room_image'] ?? null)) {
+                $data['room_image'] = $image;
+            }
+        }
         $this->rooms->update($id, $data);
         flash('success', 'Room updated.');
         redirect('rooms/' . $id);
+    }
+
+    private function imageError(): ?string
+    {
+        $file = $_FILES['room_image'] ?? null;
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return null;
+        if ($file['size'] > 2 * 1024 * 1024) return 'Room photo must be under 2 MB.';
+        $info = getimagesize($file['tmp_name']);
+        if (!$info || !isset(self::ROOM_IMAGE_TYPES[$info['mime']])) {
+            return 'Only JPG, PNG, GIF or WebP photos are allowed.';
+        }
+        return null;
+    }
+
+    private function saveImage(int $id, ?string $current): ?string
+    {
+        $file = $_FILES['room_image'] ?? null;
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return $current;
+        $info = getimagesize($file['tmp_name']);
+        $ext = $info ? (self::ROOM_IMAGE_TYPES[$info['mime']] ?? 'jpg') : 'jpg';
+        $dir = dirname(__DIR__) . '/' . self::ROOM_IMAGE_DIR;
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        $name = 'room_' . $id . '.' . $ext;
+        if ($current && $current !== $name) {
+            $old = $dir . '/' . basename($current);
+            if (is_file($old)) unlink($old);
+        }
+        move_uploaded_file($file['tmp_name'], $dir . '/' . $name);
+        return $name;
+    }
+
+    private function removeImage(?string $current): void
+    {
+        if (!$current) return;
+        $old = dirname(__DIR__) . '/' . self::ROOM_IMAGE_DIR . '/' . basename($current);
+        if (is_file($old)) unlink($old);
     }
 
     public function destroy(int $id): void

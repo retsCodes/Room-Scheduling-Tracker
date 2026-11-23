@@ -46,24 +46,27 @@ final class Room
     public function create(array $data): int
     {
         $this->db->run(
-            'INSERT INTO tblRooms (map_id, room_name, shape_type, shape_data, room_description, room_status)
-             VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO tblRooms (map_id, room_name, shape_type, shape_data, room_description, room_image, room_status)
+             VALUES (?, ?, ?, ?, ?, ?, ?)',
             [$data['map_id'], $data['room_name'], $data['shape_type'],
              $data['shape_data'], $data['room_description'] ?? null,
-             $data['room_status'] ?? 'active']
+             $data['room_image'] ?? null, $data['room_status'] ?? 'active']
         );
         return (int) $this->db->lastInsertId();
     }
 
     public function update(int $id, array $data): void
     {
-        $this->db->run(
-            'UPDATE tblRooms SET map_id = ?, room_name = ?, shape_type = ?, shape_data = ?,
-             room_description = ?, room_status = ? WHERE room_id = ?',
-            [$data['map_id'], $data['room_name'], $data['shape_type'],
+        $sets = 'map_id = ?, room_name = ?, shape_type = ?, shape_data = ?, room_description = ?, room_status = ?';
+        $params = [$data['map_id'], $data['room_name'], $data['shape_type'],
              $data['shape_data'], $data['room_description'] ?? null,
-             $data['room_status'] ?? 'active', $id]
-        );
+             $data['room_status'] ?? 'active'];
+        if (array_key_exists('room_image', $data)) {
+            $sets .= ', room_image = ?';
+            $params[] = $data['room_image'];
+        }
+        $params[] = $id;
+        $this->db->run('UPDATE tblRooms SET ' . $sets . ' WHERE room_id = ?', $params);
     }
 
     public function delete(int $id): void

@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS tblMaps (
   map_width        DECIMAL(10,2) NOT NULL,
   map_height       DECIMAL(10,2) NOT NULL,
   background_image VARCHAR(255),
+  decorations      TEXT,
   map_status       VARCHAR(20) NOT NULL DEFAULT 'active',
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS tblRooms (
   shape_type       VARCHAR(20)  NOT NULL DEFAULT 'rectangle',
   shape_data       TEXT NOT NULL,
   room_description VARCHAR(255),
+  room_image       VARCHAR(255),
   room_status      VARCHAR(20)  NOT NULL DEFAULT 'active',
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

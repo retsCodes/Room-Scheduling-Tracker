@@ -1,6 +1,13 @@
 <h1><?= $room ? 'Edit room' : 'New room' ?></h1>
-<form method="post" action="<?= $room ? url('rooms/' . (int) $room['room_id']) : url('rooms') ?>" class="card form">
+<form method="post" action="<?= $room ? url('rooms/' . (int) $room['room_id']) : url('rooms') ?>" class="card form" enctype="multipart/form-data">
   <?= csrf_field() ?>
+  <label>Room photo (optional) - what the room looks like
+    <input type="file" name="room_image" accept="image/jpeg,image/png,image/gif,image/webp">
+  </label>
+  <?php if (!empty($room['room_image'])): ?>
+    <img class="room-photo" src="<?= url('uploads/rooms/' . e($room['room_image'])) ?>" alt="Current photo of <?= e($room['room_name']) ?>">
+    <label style="font-weight:400"><input type="checkbox" name="remove_image" value="1"> Remove current photo</label>
+  <?php endif; ?>
   <label>Floor map
     <select name="map_id" required>
       <?php foreach ($maps as $m): ?>

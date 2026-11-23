@@ -1,6 +1,8 @@
 <?php
+use App\Models\Map;
 use App\Models\Room;
 
+$editorDecorations = json_decode((string) ($map['decorations'] ?? ''), true) ?: [];
 $editorRooms = [];
 foreach ($rooms as $r) {
     $editorRooms[] = [
@@ -35,11 +37,14 @@ foreach ($rooms as $r) {
         <a class="tool-btn tool-back" href="<?= url('maps/' . (int) $map['map_id']) ?>" title="Back to map">←</a>
         <button class="tool-btn active" type="button" id="tool-select" title="Select / move rooms">▢</button>
         <button class="tool-btn tool-add" type="button" id="tool-add" title="Add room - then click the map">▣</button>
+        <button class="tool-btn" type="button" id="tool-box" title="Add a coloured box - then click the map">▭</button>
+        <button class="tool-btn" type="button" id="tool-text" title="Add a text label - then click the map">T</button>
         <button class="tool-btn" type="button" id="zoom-in" title="Zoom in">＋</button>
         <button class="tool-btn" type="button" id="zoom-out" title="Zoom out">－</button>
         <button class="tool-btn" type="button" id="fullscreen-btn" title="Fullscreen">⛶</button>
       </div>
       <svg id="editor-svg" viewBox="0 0 <?= (int) $map['map_width'] ?> <?= (int) $map['map_height'] ?>" role="img" aria-label="Editable floor map">
+        <?= Map::decorationsToSvg($editorDecorations) ?>
         <?php foreach ($rooms as $r):
           $rid = (int) $r['room_id'];
           if (($r['room_status'] ?? 'active') !== 'active') { $fill = '#e2e8f0'; $stroke = '#94a3b8'; }
@@ -69,9 +74,30 @@ foreach ($rooms as $r) {
   </div>
 
   <aside class="card props-panel" id="props-panel">
-    <h2>Room Properties</h2>
-    <p class="muted" id="props-empty">Click a room on the map to edit it.</p>
+    <h2 id="props-title">Room Properties</h2>
+    <p class="muted" id="props-empty">Click a room on the map to edit it, or a box or text label to style it.</p>
     <button class="btn" type="button" id="discard-layout" style="width:100%;margin-bottom:.7rem" disabled>Discard changes</button>
+    <div id="deco-form" style="display:none">
+      <p class="muted" id="deco-type-label">Decoration</p>
+      <div class="props-row">
+        <label>X position (px) <input type="number" id="deco-x" step="10" min="0"></label>
+        <label>Y position (px) <input type="number" id="deco-y" step="10" min="0"></label>
+      </div>
+      <div class="props-row" id="deco-size-row">
+        <label>Width (px) <input type="number" id="deco-w" step="10" min="10"></label>
+        <label>Height (px) <input type="number" id="deco-h" step="10" min="10"></label>
+      </div>
+      <div id="deco-box-fields">
+        <label>Fill colour <input type="color" id="deco-fill" value="#e2e8f0"></label>
+        <label>Label (optional) <input type="text" id="deco-label" maxlength="60"></label>
+      </div>
+      <div id="deco-text-fields" style="display:none">
+        <label>Text <input type="text" id="deco-text" maxlength="80"></label>
+        <label>Font size (px) <input type="number" id="deco-size" step="2" min="10" max="72"></label>
+        <label>Text colour <input type="color" id="deco-color" value="#64748b"></label>
+      </div>
+      <p style="text-align:center;margin-top:.6rem"><button class="btn btn-small btn-danger" type="button" id="delete-deco">Delete decoration</button></p>
+    </div>
     <div id="props-form" style="display:none">
       <label>Room Name <input type="text" id="prop-name" maxlength="100"></label>
       <div class="props-row">
@@ -98,14 +124,15 @@ foreach ($rooms as $r) {
       </label>
       <button class="btn btn-small" type="button" id="add-corner" style="display:none;width:100%;margin-bottom:.5rem">+ Add corner</button>
       <button class="btn btn-small" type="button" id="convert-polygon" style="display:none;width:100%;margin-bottom:.5rem">Convert to polygon</button>
-      <button class="btn btn-primary" type="button" id="save-layout" style="width:100%;padding:.7rem"><span id="unsaved-dot" class="unsaved-dot" style="display:none"></span>Save Changes</button>
       <p style="text-align:center;margin-top:.6rem"><button class="btn btn-small btn-danger" type="button" id="delete-room">Delete room</button></p>
     </div>
+    <button class="btn btn-primary" type="button" id="save-layout" style="width:100%;padding:.7rem"><span id="unsaved-dot" class="unsaved-dot" style="display:none"></span>Save Changes</button>
   </aside>
 </div>
 
 <?php $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT; ?>
 <script type="application/json" id="editor-rooms"><?= json_encode($editorRooms, $jsonFlags) ?></script>
+<script type="application/json" id="editor-decorations"><?= json_encode($editorDecorations, $jsonFlags) ?></script>
 <script type="application/json" id="editor-meta"><?= json_encode([
   'mapId' => (int) $map['map_id'],
   'mapWidth' => (int) $map['map_width'],

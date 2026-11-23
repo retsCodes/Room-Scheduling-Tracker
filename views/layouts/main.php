@@ -37,13 +37,8 @@ if ($current === '') {
       <p class="nav-section">Account</p>
       <a href="<?= url('profile') ?>" class="<?= $current === 'profile' ? 'active' : '' ?>"><span class="nav-icon">👤</span> My Profile</a>
       <?php if ($isAdmin): ?>
-        <?php $onAdminPage = ($current === 'users'); ?>
-        <?php if ($onAdminPage): ?>
-        <p class="nav-section">Admin</p>
-        <a href="<?= url('users') ?>" class="active"><span class="nav-icon">👥</span> User List</a>
-        <?php endif; ?>
         <div class="sidebar-switch">
-          <a class="btn" href="<?= url($onAdminPage ? '' : 'users') ?>"><?= $onAdminPage ? '← Back to user view' : 'Switch to Admin' ?></a>
+          <a class="btn" href="<?= url('admin') ?>">Switch to Admin</a>
         </div>
       <?php endif; ?>
     </nav>

@@ -74,6 +74,7 @@ $qs = fn(array $extra) => url('rooms?' . http_build_query(array_filter(array_mer
           ][$c['status']];
         ?>
         <a class="room-card" href="<?= url('rooms/' . (int) $r['room_id']) ?>">
+          <?php if (!empty($r['room_image'])): ?><img class="room-card-photo" src="<?= url('uploads/rooms/' . e($r['room_image'])) ?>" alt="Photo of <?= e($r['room_name']) ?>"><?php endif; ?>
           <div class="room-card-top">
             <strong><?= e($r['room_name']) ?></strong>
             <span class="badge <?= $badge[0] ?>"><?= $badge[1] ?></span>

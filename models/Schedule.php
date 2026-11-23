@@ -48,6 +48,9 @@ final class Schedule
             $where[] = 's.schedule_status = ?';
             $params[] = $filters['status'];
         }
+        if (!empty($filters['unconfirmed'])) {
+            $where[] = "s.admin_confirmed = 0 AND s.schedule_status = 'active'";
+        }
         if (!empty($filters['organizer_id'])) {
             $where[] = 's.organizer_id = ?';
             $params[] = (int) $filters['organizer_id'];

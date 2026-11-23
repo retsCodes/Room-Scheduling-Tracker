@@ -1,0 +1,2 @@
+ALTER TABLE tblMaps ADD COLUMN decorations TEXT NULL;
+ALTER TABLE tblRooms ADD COLUMN room_image VARCHAR(255) NULL;
