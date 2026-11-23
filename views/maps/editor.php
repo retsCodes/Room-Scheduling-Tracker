@@ -82,7 +82,7 @@ foreach ($rooms as $r) {
         <label>X position (px) <input type="number" id="prop-x" step="10" min="0"></label>
         <label>Y position (px) <input type="number" id="prop-y" step="10" min="0"></label>
       </div>
-      <p class="editor-hint" id="prop-shape-note" style="display:none">Only rectangles can be resized here - use the room form for exact points.</p>
+      <p class="editor-hint" id="prop-shape-note" style="display:none"></p>
       <label>Status
         <select id="prop-status">
           <option value="active">● Available</option>
@@ -94,9 +94,10 @@ foreach ($rooms as $r) {
         <select id="prop-shape">
           <option value="rectangle">Rectangle</option>
           <option value="polygon">Polygon</option>
-          <option value="path">Path</option>
         </select>
       </label>
+      <button class="btn btn-small" type="button" id="add-corner" style="display:none;width:100%;margin-bottom:.5rem">+ Add corner</button>
+      <button class="btn btn-small" type="button" id="convert-polygon" style="display:none;width:100%;margin-bottom:.5rem">Convert to polygon</button>
       <button class="btn btn-primary" type="button" id="save-layout" style="width:100%;padding:.7rem"><span id="unsaved-dot" class="unsaved-dot" style="display:none"></span>Save Changes</button>
       <p style="text-align:center;margin-top:.6rem"><button class="btn btn-small btn-danger" type="button" id="delete-room">Delete room</button></p>
     </div>

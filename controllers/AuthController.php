@@ -12,25 +12,20 @@ final class AuthController
     public function __construct(private User $users) {}
 
     
-    public function showLogin(string $scope = 'student'): void
+    public function showLogin(): void
     {
         if (Auth::check()) {
             redirect('');
         }
-        $scope = $scope === 'admin' ? 'admin' : 'student';
-        view('auth/login', [
-            'title' => $scope === 'admin' ? 'Admin log in' : 'Student log in',
-            'scope' => $scope,
-        ]);
+        view('auth/login', ['title' => 'Log in']);
     }
 
     
-    public function login(string $scope = 'student'): void
+    public function login(): void
     {
-        $scope = $scope === 'admin' ? 'admin' : 'student';
         if (!is_post() || !verify_csrf()) {
             flash('error', 'Invalid request. Please try again.');
-            redirect('login/' . $scope);
+            redirect('login');
         }
         $login = trim((string) ($_POST['login'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
@@ -38,17 +33,7 @@ final class AuthController
         if ($user === null || !$this->users->verifyPassword($user, $password)) {
             $_SESSION['_old'] = ['login' => $login];
             flash('error', 'Wrong username/email or password.');
-            redirect('login/' . $scope);
-        }
-        
-        
-        if ($scope === 'admin' && $user['role'] !== 'admin') {
-            flash('error', 'That account is not an admin account. Use the student login instead.');
-            redirect('login/student');
-        }
-        if ($scope === 'student' && !in_array($user['role'], ['student', 'teacher', 'officer', 'mayor', 'scheduler', 'viewer'], true)) {
-            flash('error', 'That is an admin account. Use the admin login instead.');
-            redirect('login/admin');
+            redirect('login');
         }
         unset($_SESSION['_old']);
         Auth::login($user);

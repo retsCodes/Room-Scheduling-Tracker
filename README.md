@@ -9,13 +9,13 @@ Book rooms, see who's using a room right now on a floor map, check availability,
 - **Auth & roles** - register / log in with hashed passwords (`password_hash`). Roles: `admin`, `teacher`, `student`, `officer` (org officer), `mayor` (class mayor, plus `scheduler` / `viewer`). The first account on a fresh install becomes admin. **Only admins, teachers, class mayors and org officers can book rooms / make schedules (Add Reserve)** - students log in only to check schedules (read-only; booking buttons are hidden from them and the server rejects their booking requests). Admins manage maps, rooms and users.
 - **Admin confirmation** - every schedule has an admin confirmation (`admin_confirmed` on tblSchedules; run `database/migrations/001_add_admin_confirmed.sql` once on an existing database). Schedules stay active without confirmation. Overlapping bookings are never blocked: both stay active, and an admin confirms one (green light) from the schedule page - confirming one does not delete the other. Availability, the room list, room details and the dashboard all show each booking's confirmation state (✓ Admin confirmed / Awaiting confirmation), and rooms with bookings can still be booked.
 - **Confirmations** - deletes, cancels and discards ask in a Bootstrap modal ("Are you sure?") instead of the browser's own dialog.
-- **Map editor** - the Room Properties panel now has a Shape selector (rectangle / polygon / path, converted from the room's current bounds) and a Discard changes button that restores the last saved layout. The add-room tool is now ▣ (blue) so it can't be mistaken for zoom-in ＋.
+- **Map editor** - the Room Properties panel has a Shape selector (rectangle / polygon, converted from the room's current bounds) and a Discard changes button that restores the last saved layout. Polygons are fully editable: drag the white corner dots to reshape them, change Width / Height to scale them, or use + Add corner to add a point on the longest edge. Old path-shaped rooms cannot be dragged until converted - select one and hit Convert to polygon. The add-room tool is now ▣ (blue) so it can't be mistaken for zoom-in ＋.
 - **Rooms list (visual, not tables)** - week strip (Sun–Sat with the selected day highlighted), filter bar (time, room search, floor, status, teacher/mayor search, Recent Filters), rooms grouped by floor as cards showing live status (AVAILABLE / CONFIRMED / RESERVED / UNAVAILABLE), booking time and who booked it. Click a card to open the room.
 - **Room details (visual)** - big status badge, room info, today's timeline, today's and upcoming bookings as cards, and **＋ Add Reserve** shown only to admins, teachers, class mayors and org officers.
-- **Separate logins** - admin and student logins are different pages, not one form. `/login` IS the student login (the only login linked anywhere public). `/login/admin` only accepts admin accounts and is **not linked from any student-facing page** - admins reach it by direct URL, shared privately. `/login/student` is for students (teachers and org officers log in there too). An admin account is rejected on the student page and vice versa.
-- **Home page = first floor map** - the first page anyone sees showcases the first floor layout (lowest active floor) with live room status: green available, red occupied now, amber reserved later today, grey unavailable. Click a room to open its details page; hovering previews it in the side panel with today's bookings; floor tabs switch floors; quick search filters rooms. Logged-in users get the same map plus dashboard stats.
+- **One login for everyone** - a single login page (`/login`) accepts every role, admins included. Old links `/login/admin` and `/login/student` redirect to it. Once logged in, admins see an **Admin** button in the top bar that opens the User List, and on admin pages the same button reads **Back to user view** and returns to the room list.
+- **Home page = login** - opening the app sends guests straight to the login page; logged-in users land on the room list. The campus map itself is still under Campus Map in the sidebar, with live room status: green available, red occupied now, amber reserved later today, grey unavailable. Click a room to open its details page; hovering previews it in the side panel with today's bookings; floor tabs switch floors; quick search filters rooms.
 - **Interactive map** - rooms animate on hover/select, busy rooms pulse, floor tabs and quick search filter live, and each room page has a timeline view of today's bookings (Figma Room Details).
-- **Admin map editor** - `/maps/{id}/editor`: drag rooms to move them, drag the white corner dot to resize rectangles, edit name/position/size/description/status in the Room Properties panel and watch the map redesign live, then Save Changes. EXPORT downloads the map + rooms as JSON; IMPORT uploads a JSON export back in (matched by room id, then name - nothing is deleted). Toolbar has back, select/add-room tools, zoom +/− and fullscreen; legend sits under the map.
+- **Admin map editor** - `/maps/{id}/editor`: drag rooms to move them, drag the white corner dot to resize rectangles, drag a polygon's corner dots to reshape it, edit name/position/size/description/status in the Room Properties panel and watch the map redesign live, then Save Changes. EXPORT downloads the map + rooms as JSON; IMPORT uploads a JSON export back in (matched by room id, then name - nothing is deleted). Toolbar has back, select/add-room tools, zoom +/− and fullscreen; legend sits under the map.
 - **Sidebar** - categorized: Campus Map (Campus Map, Rooms), Schedule (Schedules, Calendar, Availability, Occurrences), Admin (User List, admins only), Account (My Profile).
 - **Profile** - `/profile`: avatar with Change Picture, editable username/email/section/organization/phone, password change, and Delete Account. Roles can only be changed by an admin on the User List.
 - **Calendar** - month grid with today highlighted and bookings as coloured pills (click one to open the schedule).
@@ -93,13 +93,13 @@ php -S localhost:8000
 
 Demo logins after `seed.sql` (password for all three: **`password123`** - change them before going live):
 
-| Username | Email | Role | Login page | Can book? |
-|---|---|---|---|---|---|
-| `admin` | admin@example.com | admin | `/login/admin` (direct URL only) | Yes |
-| `jdoe` | jdoe@example.com | teacher | `/login/student` | Yes |
-| `officer` | officer@example.com | org officer | `/login/student` | Yes |
-| `mayor` | mayor@example.com | class mayor, BSIT-1A | `/login/student` | Yes |
-| `ana` | ana@example.com | student, BSIT-1A | `/login/student` | No - views only |
+| Username | Email | Role | Can book? |
+|---|---|---|---|
+| `admin` | admin@example.com | admin | Yes |
+| `jdoe` | jdoe@example.com | teacher | Yes |
+| `officer` | officer@example.com | org officer | Yes |
+| `mayor` | mayor@example.com | class mayor, BSIT-1A | Yes |
+| `ana` | ana@example.com | student, BSIT-1A | No - views only |
 
 ## Folder name / XAMPP - it just works
 
@@ -111,7 +111,7 @@ detects the folder from the running script (`base_path()`), and the router
 in `index.php` strips that same prefix before matching routes. If you ever
 need to force it, set `APP_URL=http://localhost/MyFolder` in `.env`.
 
-Clean URLs (`/login/admin`, `/schedules`, …) are handled by `.htaccess`
+Clean URLs (`/login`, `/schedules`, …) are handled by `.htaccess`
 at the project root (Apache `mod_rewrite`, on by default in XAMPP).
 If the design (CSS) is not showing, or pages 404 in XAMPP, check these:
 1. Open the project through the folder URL, e.g.

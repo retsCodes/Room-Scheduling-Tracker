@@ -37,6 +37,7 @@ spl_autoload_register(function (string $class): void {
 
 use App\Controllers\AuthController;
 use App\Controllers\AvailabilityController;
+use App\Core\Auth;
 use App\Controllers\DashboardController;
 use App\Controllers\MapController;
 use App\Controllers\OccurrenceController;
@@ -134,20 +135,13 @@ $segments = $path === '' ? [] : explode('/', $path);
 
 try {
     if ($path === '') {
-        $dashboard->index();
+        redirect(Auth::check() ? 'rooms' : 'login');
     } elseif ($path === 'login' && !$isPost) {
-        
-        
-        
-        $auth->showLogin('student');
-    } elseif ($path === 'login/admin' && !$isPost) {
-        $auth->showLogin('admin');
-    } elseif ($path === 'login/admin' && $isPost) {
-        $auth->login('admin');
-    } elseif ($path === 'login/student' && !$isPost) {
-        $auth->showLogin('student');
-    } elseif ($path === 'login/student' && $isPost) {
-        $auth->login('student');
+        $auth->showLogin();
+    } elseif ($path === 'login' && $isPost) {
+        $auth->login();
+    } elseif ($path === 'login/admin' || $path === 'login/student') {
+        redirect('login');
     } elseif ($path === 'register' && !$isPost) {
         $auth->showRegister();
     } elseif ($path === 'register' && $isPost) {
@@ -252,5 +246,5 @@ try {
     }
     http_response_code(500);
     echo '<h1>Something went wrong</h1><p>' . htmlspecialchars($e->getMessage()) . '</p>'
-        . '<p><a href="' . e(url('')) . '">Back to dashboard</a></p>';
+        . '<p><a href="' . e(url('')) . '">Back to home</a></p>';
 }

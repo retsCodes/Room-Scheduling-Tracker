@@ -25,7 +25,6 @@ if ($current === '') {
   <aside class="sidebar">
     <a class="brand" href="<?= url('') ?>"><span class="brand-mark">R</span> Room Scheduling<br>Tracker</a>
     <nav>
-      <a href="<?= url('') ?>" class="<?= $current === 'dashboard' ? 'active' : '' ?>"><span class="nav-icon">🏠</span> Dashboard</a>
       <p class="nav-section">Campus Map</p>
       <a href="<?= url('maps') ?>" class="<?= $current === 'maps' ? 'active' : '' ?>"><span class="nav-icon">🗺️</span> Campus Map</a>
       <a href="<?= url('rooms') ?>" class="<?= $current === 'rooms' ? 'active' : '' ?>"><span class="nav-icon">🚪</span> Rooms</a>
@@ -50,6 +49,10 @@ if ($current === '') {
     <header class="topbar">
       <p class="page-title"><?= e($title ?? 'Room Scheduling Tracker') ?></p>
       <div class="top-actions">
+        <?php if ($isAdmin): ?>
+          <?php $onAdminPage = ($current === 'users'); ?>
+          <a class="btn btn-small <?= $onAdminPage ? '' : 'btn-primary' ?>" href="<?= url($onAdminPage ? 'rooms' : 'users') ?>"><?= $onAdminPage ? '← Back to user view' : 'Admin' ?></a>
+        <?php endif; ?>
         <span class="muted"><?= e(date('l, F j, Y')) ?></span>
       </div>
     </header>

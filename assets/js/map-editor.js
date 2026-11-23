@@ -60,6 +60,11 @@
     if (r.shape_type === 'rectangle') {
       html += '<circle class="editor-handle" data-room-id="' + r.room_id + '" cx="' + ((+d.x || 0) + (+d.width || 100)) + '" cy="' + ((+d.y || 0) + (+d.height || 80)) + '" r="9" />';
     }
+    if (r.shape_type === 'polygon') {
+      (d.points || []).forEach(function (p, i) {
+        html += '<circle class="editor-vertex" data-room-id="' + r.room_id + '" data-vertex="' + i + '" cx="' + (+p.x || 0) + '" cy="' + (+p.y || 0) + '" r="7" />';
+      });
+    }
     return html + '</g>';
   }
   function renderAll() {
@@ -94,6 +99,18 @@
     if (handle && r.shape_type === 'rectangle') {
       handle.setAttribute('cx', (+d.x || 0) + (+d.width || 100));
       handle.setAttribute('cy', (+d.y || 0) + (+d.height || 80));
+    }
+    if (r.shape_type === 'polygon') {
+      var vertices = g.querySelectorAll('.editor-vertex');
+      var pts = d.points || [];
+      if (vertices.length === pts.length) {
+        vertices.forEach(function (v, i) {
+          v.setAttribute('cx', +pts[i].x || 0);
+          v.setAttribute('cy', +pts[i].y || 0);
+        });
+      } else {
+        renderAll();
+      }
     }
   }
 
@@ -134,8 +151,6 @@
         { x: Math.round(b.x + b.w), y: Math.round(b.y + b.h) },
         { x: Math.round(b.x), y: Math.round(b.y + b.h) },
       ] };
-    } else if (type === 'path') {
-      r.shape_data = { d: 'M ' + Math.round(b.x) + ' ' + Math.round(b.y) + ' H ' + Math.round(b.x + b.w) + ' V ' + Math.round(b.y + b.h) + ' H ' + Math.round(b.x) + ' Z' };
     }
     r.shape_type = type;
   }
@@ -154,22 +169,37 @@
     document.getElementById('prop-name').value = r.room_name;
     document.getElementById('prop-desc').value = r.room_description || '';
     document.getElementById('prop-status').value = r.room_status;
-    document.getElementById('prop-shape').value = r.shape_type;
     var d = r.shape_data || {};
-    var isRect = r.shape_type === 'rectangle';
-    document.getElementById('prop-w').disabled = !isRect;
-    document.getElementById('prop-h').disabled = !isRect;
-    document.getElementById('prop-shape-note').style.display = isRect ? 'none' : '';
-    if (isRect) {
+    var shapeSel = document.getElementById('prop-shape');
+    shapeSel.disabled = r.shape_type === 'path';
+    if (r.shape_type !== 'path') shapeSel.value = r.shape_type;
+    var b = boundsOf(r);
+    var isPath = r.shape_type === 'path';
+    document.getElementById('prop-w').disabled = isPath;
+    document.getElementById('prop-h').disabled = isPath;
+    document.getElementById('prop-x').disabled = isPath;
+    document.getElementById('prop-y').disabled = isPath;
+    var note = document.getElementById('prop-shape-note');
+    if (isPath) {
+      note.textContent = 'This shape cannot be edited here - convert it to a polygon to reshape it.';
+      note.style.display = '';
+    } else if (r.shape_type === 'polygon') {
+      note.textContent = 'Drag the corner dots to reshape, or change Width / Height to scale it.';
+      note.style.display = '';
+    } else {
+      note.style.display = 'none';
+    }
+    document.getElementById('add-corner').style.display = r.shape_type === 'polygon' ? '' : 'none';
+    document.getElementById('convert-polygon').style.display = isPath ? '' : 'none';
+    if (r.shape_type === 'rectangle') {
       document.getElementById('prop-x').value = +d.x || 0;
       document.getElementById('prop-y').value = +d.y || 0;
-      document.getElementById('prop-w').value = +d.width || 100;
-      document.getElementById('prop-h').value = +d.height || 80;
     } else {
-      var c = centre(r);
-      document.getElementById('prop-x').value = Math.round(c[0]);
-      document.getElementById('prop-y').value = Math.round(c[1]);
+      document.getElementById('prop-x').value = Math.round(b.x + b.w / 2);
+      document.getElementById('prop-y').value = Math.round(b.y + b.h / 2);
     }
+    document.getElementById('prop-w').value = Math.round(b.w);
+    document.getElementById('prop-h').value = Math.round(b.h);
   }
   function bindProp(id, fn) {
     document.getElementById(id).addEventListener('input', function (e) {
@@ -193,8 +223,49 @@
     if (r.shape_type === 'rectangle') { d.y = n; }
     else { var c = centre(r); var dy = n - c[1]; (d.points || []).forEach(function (p) { p.y = (+p.y || 0) + dy; }); }
   });
-  bindProp('prop-w', function (r, v) { if (r.shape_type === 'rectangle') r.shape_data.width = Math.max(40, +v || 40); });
-  bindProp('prop-h', function (r, v) { if (r.shape_type === 'rectangle') r.shape_data.height = Math.max(40, +v || 40); });
+  bindProp('prop-w', function (r, v) {
+    var n = Math.max(40, +v || 40);
+    if (r.shape_type === 'rectangle') { r.shape_data.width = n; return; }
+    if (r.shape_type !== 'polygon') return;
+    var b = boundsOf(r);
+    var s = n / Math.max(1, b.w);
+    var cx = b.x + b.w / 2;
+    (r.shape_data.points || []).forEach(function (p) { p.x = Math.max(0, Math.round(cx + ((+p.x || 0) - cx) * s)); });
+  });
+  bindProp('prop-h', function (r, v) {
+    var n = Math.max(40, +v || 40);
+    if (r.shape_type === 'rectangle') { r.shape_data.height = n; return; }
+    if (r.shape_type !== 'polygon') return;
+    var b = boundsOf(r);
+    var s = n / Math.max(1, b.h);
+    var cy = b.y + b.h / 2;
+    (r.shape_data.points || []).forEach(function (p) { p.y = Math.max(0, Math.round(cy + ((+p.y || 0) - cy) * s)); });
+  });
+  document.getElementById('add-corner').addEventListener('click', function () {
+    var r = findRoom(selectedId);
+    if (!r || r.shape_type !== 'polygon') return;
+    var pts = r.shape_data.points || [];
+    if (pts.length < 3) return;
+    var best = 0, bestLen = -1;
+    for (var i = 0; i < pts.length; i++) {
+      var a = pts[i], b = pts[(i + 1) % pts.length];
+      var len = Math.hypot((+b.x || 0) - (+a.x || 0), (+b.y || 0) - (+a.y || 0));
+      if (len > bestLen) { bestLen = len; best = i; }
+    }
+    var p1 = pts[best], p2 = pts[(best + 1) % pts.length];
+    pts.splice(best + 1, 0, { x: Math.round(((+p1.x || 0) + (+p2.x || 0)) / 2), y: Math.round(((+p1.y || 0) + (+p2.y || 0)) / 2) });
+    renderAll();
+    select(r.room_id);
+    markUnsaved();
+  });
+  document.getElementById('convert-polygon').addEventListener('click', function () {
+    var r = findRoom(selectedId);
+    if (!r || r.shape_type !== 'path') return;
+    changeShape(r, 'polygon');
+    renderAll();
+    select(r.room_id);
+    markUnsaved();
+  });
   document.getElementById('prop-shape').addEventListener('change', function (e) {
     var r = findRoom(selectedId);
     if (!r) return;
@@ -293,16 +364,20 @@
       e.preventDefault();
       return;
     }
+    var vertex = e.target.closest ? e.target.closest('.editor-vertex') : null;
     var handle = e.target.closest ? e.target.closest('.editor-handle') : null;
     var group = e.target.closest ? e.target.closest('.editor-room') : null;
     if (!group) return;
     var id = +group.getAttribute('data-room-id');
     var r = findRoom(id);
-    if (!r || r.shape_type === 'path') return;
+    if (!r) return;
     select(id);
+    if (r.shape_type === 'path') return;
     var p = svgPoint(e);
+    var mode = vertex ? 'vertex' : (handle ? 'resize' : 'move');
     drag = {
-      id: id, mode: handle ? 'resize' : 'move',
+      id: id, mode: mode,
+      vertex: vertex ? +vertex.getAttribute('data-vertex') : -1,
       startX: p.x, startY: p.y,
       orig: JSON.parse(JSON.stringify(r.shape_data || {})),
     };
@@ -317,7 +392,15 @@
     var dx = snap(p.x - drag.startX);
     var dy = snap(p.y - drag.startY);
     var d = r.shape_data || {};
-    if (drag.mode === 'move') {
+    if (drag.mode === 'vertex') {
+      var pts = d.points || [];
+      var pt = pts[drag.vertex];
+      var origPt = (drag.orig.points || [])[drag.vertex];
+      if (pt && origPt) {
+        pt.x = Math.max(0, (+origPt.x || 0) + dx);
+        pt.y = Math.max(0, (+origPt.y || 0) + dy);
+      }
+    } else if (drag.mode === 'move') {
       if (r.shape_type === 'rectangle') {
         d.x = Math.max(0, (+drag.orig.x || 0) + dx);
         d.y = Math.max(0, (+drag.orig.y || 0) + dy);
@@ -332,12 +415,16 @@
     }
     updateRoomDom(r);
 
+    var b = boundsOf(r);
     if (r.shape_type === 'rectangle') {
       document.getElementById('prop-x').value = +d.x || 0;
       document.getElementById('prop-y').value = +d.y || 0;
-      document.getElementById('prop-w').value = +d.width || 100;
-      document.getElementById('prop-h').value = +d.height || 80;
+    } else {
+      document.getElementById('prop-x').value = Math.round(b.x + b.w / 2);
+      document.getElementById('prop-y').value = Math.round(b.y + b.h / 2);
     }
+    document.getElementById('prop-w').value = Math.round(b.w);
+    document.getElementById('prop-h').value = Math.round(b.h);
     markUnsaved();
   });
   function endDrag() { drag = null; }
